@@ -1,4 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+#if ANDROID
+using Android.OS;
+#endif
 
 namespace ASFileExplorer;
 
@@ -49,25 +52,27 @@ public partial class MainPage : ContentPage
 	private async Task WaitPermissions()
 	{
 		messenger?.Send(new MessageData(MessageType.REQUEST_ALL_PERMS, this));
-#if ANDROID33_0_OR_GREATER
-		Permissions.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
-		Permissions.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
-		Permissions.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
-#endif
+
 #if ANDROID30_0_OR_GREATER
 		Permissions.Add(new PermModel(PermType.MANAGE_EXTERNAL_STORAGE));
 #else
 		Permissions.Add(new PermModel(PermType.READ_EXTERNAL_STORAGE));
 		Permissions.Add(new PermModel(PermType.WRITE_EXTERNAL_STORAGE));
 #endif
-
+#if ANDROID33_0_OR_GREATER
+		Permissions.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
+		Permissions.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
+		Permissions.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
+#endif
 		while (Permissions.Any(p => p.Permitted is false))
 		{
 			foreach (var item in Permissions)
 				messenger?.Send(new MessageData(MessageType.CHECK_ONE_PERM, item));
 			await Task.Delay(1000);
 			var perm = Permissions.FirstOrDefault(p => p.Permitted is false);
-			bool answer = await DisplayAlert("Warning", $"{perm.Key} is not permitted. This app needs all necessary permissions to work properly.", "Retry", "Open App Settings",FlowDirection.LeftToRight);
+			if (perm is null)
+				break;
+			bool answer = await DisplayAlert("Warning", $"{perm.Key} is not permitted. This app needs all necessary permissions to work properly.", "Retry", "Open App Settings", FlowDirection.LeftToRight);
 			if (answer is false)
 				AppInfo.ShowSettingsUI();
 		}

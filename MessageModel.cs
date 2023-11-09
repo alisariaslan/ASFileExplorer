@@ -15,7 +15,9 @@ public enum PermType
 	MANAGE_EXTERNAL_STORAGE, //30
 	READ_MEDIA_IMAGES, //33
 	READ_MEDIA_VIDEO, //33
-	READ_MEDIA_AUDIO //33
+	READ_MEDIA_AUDIO, //33
+	REQUEST_INSTALL_PACKAGES, //23
+	START_VIEW_PERMISSION_USAGE //30
 }
 
 public record MessageData(MessageType typeOfMessage, object data);

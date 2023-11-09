@@ -1,75 +1,103 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" BackgroundColor="Black" Shell.NavBarIsVisible="False" Loaded="ContentPage_Loaded" xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:ASFileExplorer" x:Class="ASFileExplorer.MainPage">
 
-	<ContentPage.Behaviors>
-		<toolkit:StatusBarBehavior StatusBarColor="Black" StatusBarStyle="LightContent" />
-	</ContentPage.Behaviors>
+    <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="Black" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
 
-	<ContentPage.BindingContext>
-		<local:MainPageViewModel />
-	</ContentPage.BindingContext>
+    <ContentPage.BindingContext>
+        <local:MainPageViewModel />
+    </ContentPage.BindingContext>
 
-	<ContentPage.Resources>
-		<Style TargetType="Grid">
-			<Setter Property="VisualStateManager.VisualStateGroups">
-				<VisualStateGroupList>
-					<VisualStateGroup x:Name="CommonStates">
-						<VisualState x:Name="Normal" />
-						<VisualState x:Name="Selected">
-							<VisualState.Setters>
-								<Setter Property="BackgroundColor" Value="LightGray" />
-							</VisualState.Setters>
-						</VisualState>
-					</VisualStateGroup>
-				</VisualStateGroupList>
-			</Setter>
-		</Style>
-	</ContentPage.Resources>
+    <ContentPage.Resources>
+        <Style TargetType="Grid">
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="LightGray" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentPage.Resources>
 
-	<Grid RowDefinitions="75,*,50" ColumnDefinitions="10,*,10">
-		<!-- SEARCH -->
-		<Border Grid.Row="0" Grid.Column="1" HeightRequest="50" StrokeShape="RoundRectangle 12,12,0,0" VerticalOptions="End" BackgroundColor="White">
-			<Grid ColumnDefinitions="40,*,40">
-				<Image Grid.Column="0" Source="search_dark.png" WidthRequest="25" HeightRequest="25" />
-				<Entry Grid.Column="1" Placeholder="Search by file name" Text="{Binding SearchText}" />
-				<ImageButton Grid.Column="2" Source="settings_dark" WidthRequest="25" HeightRequest="25" />
-			</Grid>
-		</Border>
+    <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="50,*,50" Margin="0">
 
-		<!-- BODY -->
-		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView ItemsLayout="VerticalList" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
-				<CollectionView.ItemTemplate>
-					<DataTemplate>
-						<Grid>
-							<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
-								<HorizontalStackLayout Spacing="5">
-									<Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
+        <!-- LEFT PANEL (Showcase) -->
+        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12,0,0,0" BackgroundColor="White"  >
 
-									<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
-								</HorizontalStackLayout>
-							</Border>
-						</Grid>
-					</DataTemplate>
-				</CollectionView.ItemTemplate>
-			</CollectionView>
-		</Border>
+        </Border>
 
-		<!-- NAVIGATION -->
-		<Border Grid.Row="2" Grid.Column="1" HeightRequest="40" StrokeShape="RoundRectangle 0,0,12,12" VerticalOptions="Start" BackgroundColor="White">
-			<CollectionView x:Name="cv_nav" ItemsLayout="HorizontalList" ItemsSource="{Binding Paths}" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}">
-				<CollectionView.ItemTemplate>
-					<DataTemplate>
-						<Grid>
-							<Border Padding="4" MinimumWidthRequest="{OnPlatform Android=30,iOS=30,WinUI=90,MacCatalyst=30}">
-								<Label FontSize="14" Text="{Binding Name,StringFormat='/{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
-							</Border>
-						</Grid>
-					</DataTemplate>
-				</CollectionView.ItemTemplate>
-			</CollectionView>
-		</Border>
+        <!-- RIGHT PANEL (Favorites) -->
+        <Border Grid.Row="1" Grid.Column="2" StrokeShape="RoundRectangle 0,12,0,0" BackgroundColor="White"  >
 
-	</Grid>
+        </Border>
+
+        <!-- SEARCH -->
+        <Border Grid.Row="0" Grid.Column="1" HeightRequest="50" StrokeShape="RoundRectangle 12,12,0,0" VerticalOptions="End" BackgroundColor="White">
+            <Grid ColumnDefinitions="40,*,40">
+                <Image Grid.Column="0" Source="search_dark.png" WidthRequest="25" HeightRequest="25" />
+                <Entry Grid.Column="1" Placeholder="Search by file name" Text="{Binding SearchText}" />
+                <ImageButton Grid.Column="2" Source="settings_dark" WidthRequest="25" HeightRequest="25" />
+            </Grid>
+        </Border>
+
+        <!-- BODY -->
+        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
+            <CollectionView EmptyView="No items to display" ItemsLayout="VerticalList" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
+
+                                    <Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+
+        <!-- NAVIGATION -->
+        <Border Grid.Row="2" Grid.ColumnSpan="3" HeightRequest="40"  VerticalOptions="Start" BackgroundColor="White">
+            <CollectionView x:Name="cv_nav" ItemsLayout="HorizontalList" ItemsSource="{Binding Paths}" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Border Padding="4" MinimumWidthRequest="{OnPlatform Android=30,iOS=30,WinUI=90,MacCatalyst=30}">
+                                <Label FontSize="14" Text="{Binding Name,StringFormat='/{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+
+        <!-- TOOLBAR -->
+        <Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" StrokeShape="RoundRectangle 0,0,12,12" VerticalOptions="Start" BackgroundColor="White">
+            <ScrollView Orientation="Horizontal">
+                <HorizontalStackLayout>
+
+                    <ImageButton Grid.Row="2"  Grid.Column="2" Source="copy_light" WidthRequest="40" />
+
+
+                    <ImageButton Grid.Row="2"  Grid.Column="0" Source="paste_light" WidthRequest="40"  />
+
+                </HorizontalStackLayout>
+
+            </ScrollView>
+        </Border>
+
+
+
+    </Grid>
 
 </ContentPage>

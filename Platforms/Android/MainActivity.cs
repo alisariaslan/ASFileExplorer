@@ -1,5 +1,6 @@
 ﻿using Android;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
@@ -16,7 +17,9 @@ namespace ASFileExplorer
 			Manifest.Permission.ManageExternalStorage,
 			Manifest.Permission.ReadMediaAudio,
 			Manifest.Permission.ReadMediaImages,
-			Manifest.Permission.ReadMediaVideo
+			Manifest.Permission.ReadMediaVideo,
+			Manifest.Permission.RequestInstallPackages,
+			Manifest.Permission.StartViewPermissionUsage
 		};
 
 		public MainActivity()
@@ -41,6 +44,18 @@ namespace ASFileExplorer
 		{
 			if (ContextCompat.CheckSelfPermission(this, model.Key) is Permission.Granted)
 				model.Permitted = true;
+
+			if (model.Perm == PermType.MANAGE_EXTERNAL_STORAGE && model.Permitted is false)
+			{
+				model.Permitted = Android.OS.Environment.IsExternalStorageManager;
+				if (model.Permitted is true)
+					return model;
+					
+				Intent intent = new Intent();
+				intent.SetAction(Android.Provider.Settings.ActionManageAllFilesAccessPermission);
+				StartActivity(intent);
+			}
+
 			return model;
 		}
 
@@ -48,6 +63,7 @@ namespace ASFileExplorer
 		{
 			ActivityCompat.RequestPermissions(this, ManifestPerms, 0);
 		}
+
 	}
 
 
