@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" BackgroundColor="Black" Shell.NavBarIsVisible="False" Loaded="ContentPage_Loaded" xmlns="http://schemas.microsoft.com/dotnet/2021/maui" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local="clr-namespace:ASFileExplorer" x:Class="ASFileExplorer.MainPage">
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ASFileExplorer.SharedView"
+             xmlns:local="clr-namespace:ASFileExplorer"
+             Loaded="ContentView_Loaded">
 
-    <ContentPage.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="Black" StatusBarStyle="LightContent" />
-    </ContentPage.Behaviors>
+    <ContentView.BindingContext>
+        <local:SharedViewModel />
+    </ContentView.BindingContext>
 
-    <ContentPage.BindingContext>
-        <local:MainPageViewModel />
-    </ContentPage.BindingContext>
-
-    <ContentPage.Resources>
+    <ContentView.Resources>
         <Style TargetType="Grid">
             <Setter Property="VisualStateManager.VisualStateGroups">
                 <VisualStateGroupList>
@@ -24,27 +24,52 @@
                 </VisualStateGroupList>
             </Setter>
         </Style>
-    </ContentPage.Resources>
+    </ContentView.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="50,*,50" Margin="0">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="Auto,*,50">
+
+        <!-- TOP PANEL (SEARCH) -->
+        <Border Grid.Row="0" Grid.ColumnSpan="3"  HeightRequest="50" BackgroundColor="White">
+            <Grid ColumnDefinitions="40,*,40">
+
+                <Border  Grid.Column="0" StrokeShape="RoundRectangle 8" Margin="5,5,0,5" Padding="5">
+                    <Image Source="search_dark"/>
+                </Border>
+
+                <Border Grid.Column="1"  StrokeShape="RoundRectangle 4" BackgroundColor="#fff" Margin="5">
+                    <Entry Placeholder="Search file or execute command" Text="{Binding SearchText}" />
+                </Border>
+
+                <Border  Grid.Column="2" StrokeShape="RoundRectangle 8" Margin="0,5,5,5" Padding="5">
+                    <Image Source="terminal_dark"/>
+                </Border>
+
+            </Grid>
+        </Border>
 
         <!-- LEFT PANEL (Showcase) -->
-        <Border Grid.Row="1" Grid.Column="0" StrokeShape="RoundRectangle 12,0,0,0" BackgroundColor="White"  >
+        <Border Grid.Row="1" Grid.Column="0" WidthRequest="50" BackgroundColor="White"  >
+            <CollectionView ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid >
+                            <Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
 
+
+                                <ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
+
+
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
         </Border>
 
         <!-- RIGHT PANEL (Favorites) -->
-        <Border Grid.Row="1" Grid.Column="2" StrokeShape="RoundRectangle 0,12,0,0" BackgroundColor="White"  >
+        <Border Grid.Row="1" Grid.Column="2"  BackgroundColor="White"  >
 
-        </Border>
-
-        <!-- SEARCH -->
-        <Border Grid.Row="0" Grid.Column="1" HeightRequest="50" StrokeShape="RoundRectangle 12,12,0,0" VerticalOptions="End" BackgroundColor="White">
-            <Grid ColumnDefinitions="40,*,40">
-                <Image Grid.Column="0" Source="search_dark.png" WidthRequest="25" HeightRequest="25" />
-                <Entry Grid.Column="1" Placeholder="Search by file name" Text="{Binding SearchText}" />
-                <ImageButton Grid.Column="2" Source="settings_dark" WidthRequest="25" HeightRequest="25" />
-            </Grid>
         </Border>
 
         <!-- BODY -->
@@ -82,7 +107,7 @@
         </Border>
 
         <!-- TOOLBAR -->
-        <Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" StrokeShape="RoundRectangle 0,0,12,12" VerticalOptions="Start" BackgroundColor="White">
+        <Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" VerticalOptions="Start" BackgroundColor="White">
             <ScrollView Orientation="Horizontal">
                 <HorizontalStackLayout>
 
@@ -96,8 +121,15 @@
             </ScrollView>
         </Border>
 
-
+        <Grid Grid.RowSpan="4" Grid.ColumnSpan="3" RowDefinitions="*,*,*" IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity=".25">
+            <VerticalStackLayout Grid.Row="2" VerticalOptions="Center">
+                <ProgressBar Progress="{Binding LoadProgress}" ProgressColor="White" WidthRequest="50" HeightRequest="10" VerticalOptions="Center"/>
+                <Label Text="{Binding LoadDesc}" TextColor="White" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+            <Button Opacity="0"/>
+        </Grid>
 
     </Grid>
 
-</ContentPage>
+</ContentView>
+

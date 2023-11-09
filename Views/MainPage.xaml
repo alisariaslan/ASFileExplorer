@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             BackgroundColor="Black" Shell.NavBarIsVisible="False"
+             Loaded="ContentPage_Loaded"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:ASFileExplorer"
+             x:Class="ASFileExplorer.MainPage">
+
+    <ContentPage.Behaviors>
+        <toolkit:StatusBarBehavior StatusBarColor="Black" StatusBarStyle="LightContent" />
+    </ContentPage.Behaviors>
+
+    <ContentPage.BindingContext>
+        <local:MainViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <Style TargetType="Grid">
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="Selected">
+                            <VisualState.Setters>
+                                <Setter Property="BackgroundColor" Value="LightGray" />
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- TAB NAVIGATION -->
+        <Border Grid.Row="0" HeightRequest="40"  VerticalOptions="Start" BackgroundColor="White">
+
+            <Grid ColumnDefinitions="40,*">
+
+                <Border Grid.Column="0" Padding="4"  WidthRequest="25" HeightRequest="25" BackgroundColor="White" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image Source="plus_dark" />
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NewTabCommand}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <CollectionView x:Name="tabs_collection" Grid.Column="1" ItemsLayout="HorizontalList" ItemsSource="{Binding TabList}" SelectionMode="Single" SelectedItem="{Binding SelectedTabModel}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Border >
+                                    <HorizontalStackLayout Spacing="30" Margin="5,0,0,0">
+                                        <Label Grid.Column="1" MaxLines="1" MinimumWidthRequest="75" MaximumWidthRequest="100" FontSize="14" Text="{Binding Name,StringFormat='{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
+                                        <Grid WidthRequest="25">
+                                            <Image Source="minus_dark" WidthRequest="20" HeightRequest="20"  BackgroundColor="White" HorizontalOptions="Center" />
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:MainViewModel}}, Path=DelTabCommand}" CommandParameter="{Binding Id}"/>
+                                            </Grid.GestureRecognizers>
+                                        </Grid>
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </Grid>
+        </Border>
+
+        <ContentView Grid.Row="1" Content="{Binding SelectedTabContent}"/>
+
+        <Grid Grid.RowSpan="2" IsVisible="false" BackgroundColor="Black" Opacity=".25">
+            <Button Opacity="0"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

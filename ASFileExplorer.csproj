@@ -32,7 +32,7 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">29.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
@@ -47,21 +47,24 @@
 	  <PublishTrimmed>False</PublishTrimmed>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
+	  <CreatePackage>false</CreatePackage>
+	</PropertyGroup>
 	<ItemGroup>
 		<!-- App Icon -->
 		<!-- <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />  -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appicon.png" ForegroundScale="0.55"/>
+		<MauiIcon Include="Resources\AppIcon\appicon.png" />
 
 		<!-- Splash Screen -->
 		<!-- <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />  -->
-		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#FFF"/>
+		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#FFF" />
 
 		<!-- Images -->
 		<PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
-		<MauiImage Include="Resources\Images\svg\light\*" BaseSize="256,256" TintColor="#FFF"   />
-		<MauiImage Include="Resources\Images\svg\dark\*" BaseSize="256,256" TintColor="#000"   />
+		<MauiImage Include="Resources\Images\svg\light\*" BaseSize="256,256" TintColor="#FFF" />
+		<MauiImage Include="Resources\Images\svg\dark\*" BaseSize="256,256" TintColor="#000" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -71,14 +74,67 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DotNetMeteor.HotReload.Plugin" Version="3.*"/>
-		<PackageReference Include="CommunityToolkit.Maui" Version="5.2.0" />
+		<PackageReference Include="DotNetMeteor.HotReload.Plugin" Version="3.*" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0-rc.2.23479.6" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="Resources\Images\svg\dark\download_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\download2_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\terminal_dark.svg" />
+	  <None Remove="Views\" />
+	  <None Remove="ViewModels\" />
+	  <None Remove="Models\" />
+	  <None Remove="Services\" />
+	  <None Remove="Resources\Images\svg\light\history_light.svg" />
+	  <None Remove="Resources\Images\svg\light\left_light.svg" />
+	  <None Remove="Resources\Images\svg\light\minus_light.svg" />
+	  <None Remove="Resources\Images\svg\light\plus_light.svg" />
+	  <None Remove="Resources\Images\svg\light\right_light.svg" />
+	  <None Remove="Resources\Images\svg\light\download_light.svg" />
+	  <None Remove="Resources\Images\svg\light\download2_light.svg" />
+	  <None Remove="Resources\Images\svg\light\terminal_light.svg" />
+	  <None Remove="Resources\Images\svg\dark\history_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\left_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\minus_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\plus_dark.svg" />
+	  <None Remove="Resources\Images\svg\dark\right_dark.svg" />
+	  <None Remove="Resources\Fonts\Poppins-Bold.ttf" />
+	  <None Remove="Resources\Fonts\Poppins-Medium.ttf" />
+	  <None Remove="Resources\Fonts\Poppins-Regular.ttf" />
+	  <None Remove="Resources\Fonts\Poppins-SemiBold.ttf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <BundleResource Include="Resources\Images\svg\dark\download_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\download2_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\terminal_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\history_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\left_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\minus_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\plus_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\right_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\download_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\download2_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\terminal_light.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\history_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\left_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\minus_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\plus_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\dark\right_dark.svg" />
+	  <BundleResource Include="Resources\Fonts\Poppins-Bold.ttf" />
+	  <BundleResource Include="Resources\Fonts\Poppins-Medium.ttf" />
+	  <BundleResource Include="Resources\Fonts\Poppins-Regular.ttf" />
+	  <BundleResource Include="Resources\Fonts\Poppins-SemiBold.ttf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Views\" />
+	  <Folder Include="ViewModels\" />
+	  <Folder Include="Models\" />
+	  <Folder Include="Services\" />
+	</ItemGroup>
 	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionASFileExplorerHideInfoBar="True" /></VisualStudio></ProjectExtensions>
 
 </Project>

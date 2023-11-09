@@ -23,6 +23,10 @@ namespace ASFileExplorer
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("Poppins-Bold.ttf", "PoppinsBold");
+                    fonts.AddFont("Poppins-Regular.ttf", "PoppinsRegular");
+                    fonts.AddFont("Poppins-SemiBold.ttf", "PoppinsSemiBold");
+                    fonts.AddFont("Poppins-Medium.ttf", "PoppinsMedium");
                 });
 
 #if DEBUG
@@ -30,7 +34,12 @@ namespace ASFileExplorer
 #endif
 
             builder.Services.AddSingleton<IMessenger, WeakReferenceMessenger>();
-            builder.Services.AddTransient<MainPage>();
+
+            builder.Services.AddSingleton<LoadingService>();
+
+            builder.Services.AddSingleton<MainPage>();
+
+            builder.Services.AddTransient<SharedView>();
 
             return builder.Build();
         }
