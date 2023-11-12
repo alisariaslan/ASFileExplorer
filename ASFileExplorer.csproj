@@ -129,12 +129,4 @@
 	  <BundleResource Include="Resources\Fonts\Poppins-Regular.ttf" />
 	  <BundleResource Include="Resources\Fonts\Poppins-SemiBold.ttf" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Views\" />
-	  <Folder Include="ViewModels\" />
-	  <Folder Include="Models\" />
-	  <Folder Include="Services\" />
-	</ItemGroup>
-	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionASFileExplorerHideInfoBar="True" /></VisualStudio></ProjectExtensions>
-
 </Project>

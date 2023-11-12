@@ -51,7 +51,8 @@
                         <DataTemplate>
                             <Grid>
                                 <Border >
-                                    <HorizontalStackLayout Spacing="30" Margin="5,0,0,0">
+                                    <HorizontalStackLayout Margin="5,0,0,0">
+                                        <ActivityIndicator IsRunning="{Binding OnOperation}" IsVisible="{Binding OnOperation}" Color="Black" Margin="0,5,0,5" />
                                         <Label Grid.Column="1" MaxLines="1" MinimumWidthRequest="75" MaximumWidthRequest="100" FontSize="14" Text="{Binding Name,StringFormat='{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
                                         <Grid WidthRequest="25">
                                             <Image Source="minus_dark" WidthRequest="20" HeightRequest="20"  BackgroundColor="White" HorizontalOptions="Center" />
@@ -71,9 +72,9 @@
 
         <ContentView Grid.Row="1" Content="{Binding SelectedTabContent}"/>
 
-        <Grid Grid.RowSpan="2" IsVisible="false" BackgroundColor="Black" Opacity=".25">
+        <!--<Grid Grid.RowSpan="2" IsVisible="false" BackgroundColor="Black" Opacity=".25">
             <Button Opacity="0"/>
-        </Grid>
+        </Grid>-->
 
     </Grid>
 

@@ -2,6 +2,7 @@
 
 public partial class SharedView : ContentView
 {
+    public TabModel tab;
     private LoadingService loadingService;
     private bool initialized;
 
@@ -27,23 +28,15 @@ public partial class SharedView : ContentView
         var vm = this.BindingContext as SharedViewModel;
         vm.NavScrollTo = new Command<int>(NavScrollTo);
         vm.MyLoadingService = loadingService;
+        vm.MyTab = tab;
         await Task.Delay(100);
         vm.OnAppear();
-        vm.StopLoad();
     }
 
-    bool clicked = false;
     async void ImageButton_Clicked(System.Object sender, System.EventArgs e)
     {
-        if (clicked)
-            return;
-
-        clicked = true;
-        var sndr = sender as VisualElement;
-        while (loadingService.IsLoading)
-        {
-            await sndr.RelRotateTo(360, 1000);
-        }
-        clicked = false;
+        var btn = sender as VisualElement;
+        await btn.ScaleTo(0.75f, 250);
+        await btn.ScaleTo(1f, 250);
     }
 }

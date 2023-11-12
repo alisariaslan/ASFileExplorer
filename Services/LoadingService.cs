@@ -1,16 +1,33 @@
-﻿using System.ComponentModel;
-
-namespace ASFileExplorer
+﻿namespace ASFileExplorer
 {
-    public class LoadingService : INotifyPropertyChanged
+    public class LoadingService : PropertyNotifier
     {
-        private bool IsLoading_ { get; set; }
-        public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); } }
+        //private bool VisualLoading_ { get; set; }
+        //public bool VisualLoading
+        //{
+        //    get { return VisualLoading_; }
+        //    set
+        //    {
+        //        VisualLoading_ = value;
+        //        OnPropertyChanged(nameof(VisualLoading));
+        //        OnPropertyChanged(nameof(Loading));
+        //    }
+        //}
 
+        //private bool DataLoading_ { get; set; }
+        //public bool DataLoading
+        //{
+        //    get { return DataLoading_; }
+        //    set
+        //    {
+        //        DataLoading_ = value;
+        //        OnPropertyChanged(nameof(DataLoading));
+        //        OnPropertyChanged(nameof(Loading));
+        //    }
+        //}
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-       
-        public void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        //public bool Loading { get { if (VisualLoading | DataLoading) return true; else return false; } }
+
 
     }
 }

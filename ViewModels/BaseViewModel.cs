@@ -1,44 +1,66 @@
-﻿using System.ComponentModel;
+﻿namespace ASFileExplorer;
 
-namespace ASFileExplorer;
-
-public class BaseViewModel : INotifyPropertyChanged
+public class BaseViewModel : PropertyNotifier, TabInterface
 {
-    private bool IsLoading_ { get; set; }
-    public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); } }
+    public List<OperationModel> LocalOperations;
+    public TabModel MyTab;
 
-    private double LoadProgress_ { get; set; }
-    public double LoadProgress { get { return LoadProgress_; } set { LoadProgress_ = value; OnPropertyChanged(nameof(LoadProgress)); } }
+    //private bool IsLoading_ { get; set; }
+    //public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); } }
 
-    private string LoadDesc_ { get; set; }
-    public string LoadDesc { get { return LoadDesc_; } set { LoadDesc_ = value; OnPropertyChanged(nameof(LoadDesc)); } }
+    //private double LoadProgress_ { get; set; }
+    //public double LoadProgress { get { return LoadProgress_; } set { LoadProgress_ = value; OnPropertyChanged(nameof(LoadProgress)); } }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    //private string LoadDesc_ { get; set; }
+    //public string LoadDesc { get { return LoadDesc_; } set { LoadDesc_ = value; OnPropertyChanged(nameof(LoadDesc)); } }
+
 
     public BaseViewModel()
     {
-        LoadDesc = "Initializing...";
+        LocalOperations = new List<OperationModel>();
+        //LoadDesc = "Initializing...";
         //StartLoad(null);
     }
 
-    public virtual void StartLoad(string desc)
+    public void CancelLastOperation()
     {
-        if (string.IsNullOrEmpty(desc) is false)
-            LoadDesc = desc;
-        LoadProgress = 1;
-        IsLoading = true;
+        LocalOperations.LastOrDefault()?.Cancel();
     }
 
-    public virtual void StopLoad()
+    public void ChangeOperationState(bool state)
     {
-        LoadProgress = 99;
-        Task.Run(async () => { await Task.Delay(100); IsLoading = false; });
+        MyTab.ChangeOperationState(state);
     }
+
+    public void ChangeTabName(string newName)
+    {
+        MyTab.ChangeTabName(newName);
+    }
+
+    public CancellationToken GetNewOperationKey()
+    {
+        LocalOperations.Add(new OperationModel(LocalOperations.Count));
+        return LocalOperations.Last().cancellationToken;
+
+    }
+
+    //public virtual void StartLoad(string desc)
+    //{
+    //    if (string.IsNullOrEmpty(desc) is false)
+    //        LoadDesc = desc;
+    //    LoadProgress = 1;
+    //    IsLoading = true;
+    //}
+
+    //public virtual void StopLoad()
+    //{
+    //    LoadProgress = 99;
+    //    Task.Run(async () => { await Task.Delay(100); IsLoading = false; });
+    //}
 
     public virtual void OnAppear()
     {
         throw new NotImplementedException();
     }
 
-    public void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

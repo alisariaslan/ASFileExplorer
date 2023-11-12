@@ -5,10 +5,23 @@ namespace ASFileExplorer;
 
 public class MainViewModel : BaseViewModel
 {
-    public int LastTabIndex;
+    public int LastTabId;
+    public int ActiveTabId;
 
     public TabModel SelectedTabModel_ { get; set; }
-    public TabModel SelectedTabModel { get { return SelectedTabModel_; } set { SelectedTabModel_ = value; OnPropertyChanged(nameof(SelectedTabModel)); SwitchTab(value); } }
+    public TabModel SelectedTabModel
+    {
+        get { return SelectedTabModel_; }
+        set
+        {
+            SelectedTabModel_ = value;
+            OnPropertyChanged(nameof(SelectedTabModel));
+            if (firstBlocker)
+                firstBlocker = false;
+            else
+                SwitchTab(value);
+        }
+    }
 
     public ContentView SelectedTabContent_ { get; set; }
     public ContentView SelectedTabContent { get { return SelectedTabContent_; } set { SelectedTabContent_ = value; OnPropertyChanged(nameof(SelectedTabContent)); } }
@@ -19,6 +32,8 @@ public class MainViewModel : BaseViewModel
     public Command DelTabCommand { get; set; }
     public Command NewTabCommand { get; set; }
     public Command ScrollTo { get; set; }
+
+    private bool firstBlocker;
 
     public MainViewModel()
     {
@@ -32,33 +47,29 @@ public class MainViewModel : BaseViewModel
     {
         var id = (int)id_;
         TabList.Remove(TabList.FirstOrDefault(t => t.Id == id));
-        SelectedTabModel = TabList.Count > 0 ? TabList.Last() : null;            
+        SelectedTabModel = TabList.Count > 0 ? TabList.Last() : null;
     }
 
-    public void CreateNewTab()
+    public async void CreateNewTab()
     {
-        var newtab = serviceProvider.GetRequiredService<SharedView>();
-        var tabmodel = new TabModel(++LastTabIndex, $"New tab {TabList.Count+1}",newtab);
-        TabList.Add(tabmodel);
-        SelectedTabModel = tabmodel;
+        await Task.Run(() =>
+        {
+            var newtab = serviceProvider.GetRequiredService<SharedView>();
+            var tabmodel = new TabModel(++LastTabId, $"New tab {TabList.Count + 1}", newtab);
+            newtab.tab = tabmodel;
+            TabList.Add(tabmodel);
+            SelectedTabModel = tabmodel;
+        });
     }
 
     public override void OnAppear()
     {
+        firstBlocker = true;
         CreateNewTab();
     }
 
-    int blocker;
-    private async void SwitchTab(TabModel tabModel)
+    private void SwitchTab(TabModel tabModel)
     {
-        blocker++;
-        if (blocker > 1)
-        {
-            blocker = 0;
-            return;
-        }
-        await Task.Delay(10);
-
         if (tabModel is null)
         {
             SelectedTabContent = new EmptyView();
@@ -66,11 +77,11 @@ public class MainViewModel : BaseViewModel
         }
         else
         {
-            SelectedTabContent = TabList.FirstOrDefault(t => t.Id == tabModel.Id).Content;
+            var tab = TabList.FirstOrDefault(t => t.Id == tabModel.Id);
+            SelectedTabContent = tab.Content;
+            ActiveTabId = tab.Id;
             ScrollTo.Execute(tabModel.Id);
         }
-
-        blocker = 0;
     }
 
     public async Task WaitPermissions(IMessenger messenger, List<PermModel> permList)

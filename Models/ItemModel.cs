@@ -13,7 +13,7 @@ public enum FileType
     ARCHIVE
 }
 
-public class ItemModel
+public class ItemModel 
 {
     public int Index { get; set; }
     public string Name { get { return Path.GetFileName(FullPath); } }

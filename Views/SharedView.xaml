@@ -24,6 +24,23 @@
                 </VisualStateGroupList>
             </Setter>
         </Style>
+
+        <DataTemplate x:Key="desktopTemplate">
+            <Grid>
+
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="mobileTemplate">
+            <Grid>
+                <Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
+                    <ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
+                </Border>
+            </Grid>
+        </DataTemplate>
+        <local:CustomDataTemplateSelector x:Key="customDataTemplateSelector"
+                                          DesktopTemplate="{StaticResource desktopTemplate}"
+                                          MobileTemplate="{StaticResource mobileTemplate}" />
     </ContentView.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="Auto,*,50">
@@ -49,22 +66,7 @@
 
         <!-- LEFT PANEL (Showcase) -->
         <Border Grid.Row="1" Grid.Column="0" WidthRequest="50" BackgroundColor="White"  >
-            <CollectionView ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid >
-                            <Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
-
-
-                                <ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
-
-
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+            <CollectionView ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None"/>
         </Border>
 
         <!-- RIGHT PANEL (Favorites) -->
@@ -74,7 +76,7 @@
 
         <!-- BODY -->
         <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-            <CollectionView EmptyView="No items to display" ItemsLayout="VerticalList" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+            <CollectionView EmptyView="No items to display" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -121,13 +123,13 @@
             </ScrollView>
         </Border>
 
-        <Grid Grid.RowSpan="4" Grid.ColumnSpan="3" RowDefinitions="*,*,*" IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity=".25">
+        <!--<Grid Grid.RowSpan="4" Grid.ColumnSpan="3" RowDefinitions="*,*,*" IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity=".25">
             <VerticalStackLayout Grid.Row="2" VerticalOptions="Center">
                 <ProgressBar Progress="{Binding LoadProgress}" ProgressColor="White" WidthRequest="50" HeightRequest="10" VerticalOptions="Center"/>
                 <Label Text="{Binding LoadDesc}" TextColor="White" HorizontalTextAlignment="Center"/>
             </VerticalStackLayout>
             <Button Opacity="0"/>
-        </Grid>
+        </Grid>-->
 
     </Grid>
 

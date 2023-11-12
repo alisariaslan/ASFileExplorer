@@ -7,135 +7,266 @@ public class SharedViewModel : BaseViewModel
     public ObservableCollection<ItemModel> Paths { get; set; }
     public List<ItemModel> Items { get; set; }
     public ObservableCollection<ItemModel> VisualItems { get; set; }
-    public ObservableCollection<PanelItemModel> LeftPanelItems { get; set; }
-    public ObservableCollection<PanelItemModel> RightPanelItems { get; set; }
-
+    public ObservableCollection<LeftPanelItemModel> LeftPanelItems { get; set; }
+    public ObservableCollection<RightPanelItemModel> RightPanelItems { get; set; }
+    public List<ItemModel> HistoryBack { get; set; }
+    public List<ItemModel> HistoryForward { get; set; }
     public ItemModel SelectedFile_ { get; set; }
-    public ItemModel SelectedFile { get { return SelectedFile_; } set { SelectedFile_ = value; OnPropertyChanged(nameof(SelectedFile)); SelectItem(value); } }
+    public ItemModel SelectedFile
+    {
+        get { return SelectedFile_; }
+        set
+        {
+            SelectedFile_ = value;
+            OnPropertyChanged(nameof(SelectedFile));
+            SelectItem(value);
+        }
+    }
 
     private ItemModel SelectedFolder_ { get; set; }
-    public ItemModel SelectedFolder { get { return SelectedFolder_; } set { SelectedFolder_ = value; OnPropertyChanged(nameof(SelectedFolder)); SwitchFolder(value); } }
+    public ItemModel SelectedFolder
+    {
+        get { return SelectedFolder_; }
+        set
+        {
+            SelectedFolder_ = value;
+            OnPropertyChanged(nameof(SelectedFolder));
+            if (firstBlocker)
+                firstBlocker = false;
+            else
+                SwitchFolder(value);
+
+        }
+    }
     private string SearchText_ { get; set; }
-    public string SearchText { get { return SearchText_; } set { SearchText_ = value; OnPropertyChanged(nameof(SearchText)); SearchItem(value); } }
+    public string SearchText
+    {
+        get { return SearchText_; }
+        set
+        {
+            SearchText_ = value; OnPropertyChanged(nameof(SearchText));
+            SearchItem(value);
+        }
+    }
 
     public Command<object> SwitchFolderPreCommand { get; set; }
+    public Command<object> RightpanelCommand { get; set; }
 
     public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
+
+    private string TemplateText_ { get; set; } = "VerticalGrid,2";
+    public string TemplateText { get { return TemplateText_; } set { TemplateText_ = value; OnPropertyChanged(nameof(TemplateText)); } }
+
+    private bool firstBlocker;
+    private bool loopBlocker;
 
     public SharedViewModel()
     {
         Paths = new ObservableCollection<ItemModel>();
         Items = new List<ItemModel>();
         VisualItems = new ObservableCollection<ItemModel>();
-        LeftPanelItems = new ObservableCollection<PanelItemModel>();
-        RightPanelItems = new ObservableCollection<PanelItemModel>();
+        LeftPanelItems = new ObservableCollection<LeftPanelItemModel>();
+        RightPanelItems = new ObservableCollection<RightPanelItemModel>();
         SwitchFolderPreCommand = new Command<object>(SwitchFolderPre);
+        HistoryBack = new List<ItemModel>();
+        HistoryForward = new List<ItemModel>();
+        RightpanelCommand = new Command<object>(RightPanelExecute);
+    }
+
+    private void RightPanelExecute(object obj)
+    {
+
+    }
+
+    private void AddToBackHistory(ItemModel model)
+    {
+        HistoryBack.Add(model);
     }
 
     private void SwitchFolderPre(object path)
     {
-        if (MyLoadingService.IsLoading)
-            return;
-
-        MyLoadingService.IsLoading = true;
         var item = LeftPanelItems.FirstOrDefault(i => i.Path.Equals(path));
-        Task.Run(() => SwitchFolder(new ItemModel(item.Path)));
+        SwitchFolder(new ItemModel(item.Path));
     }
 
-    private void ClearItems()
+    private async Task ClearItems()
     {
-        Items.Clear();
-        VisualItems.Clear();
+        await Task.Run(() =>
+        {
+            Items.Clear();
+            VisualItems.Clear();
+        });
     }
 
-    private void AddItems(ItemModel model)
+    private async Task ClearOnlyVisualItems()
     {
-        Items.Add(model);
-        VisualItems.Add(model);
+        await Task.Run(() =>
+        {
+            VisualItems.Clear();
+        });
+    }
+
+    private async Task AddItems(ItemModel model)
+    {
+        await Task.Run(() =>
+        {
+            Items.Add(model);
+            VisualItems.Add(model);
+        });
     }
 
     public override void OnAppear()
     {
-        string startPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        string startPath = string.Empty;
+
+#if MACCATALYST
+        startPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
+#endif
         //startupFolder = Path.Combine(Environment.GetEnvironmentVariable("EXTERNAL_STORAGE"));
-        //startupFolder = "/sdk_gphone64_arm64";
+
 #if ANDROID
         startPath = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
 #endif
 
-        SwitchFolder(new ItemModel(startPath));
+        UpdateLeftPanel();
 
-        GetAllLeftPanelItems();
+        firstBlocker = true;
+        SwitchFolder(new ItemModel(startPath));
     }
 
-    private async void GetAllLeftPanelItems()
+    public static bool IsFolderAccesible(string path)
     {
+        try
+        {
+            return Directory.GetFileSystemEntries(path).Any();
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+    }
+
+    private void UpdateRightPanel()
+    {
+        RightPanelItems.Clear();
+
+        var command = new Command(()=>
+        {
+
+        });
+        var model = new RightPanelItemModel() { DeclaredCommandType = CommandType.BACK, DeclaredCommand = command };
+        RightPanelItems.Add(model);
+    }
+
+    private void UpdateLeftPanel()
+    {
+        LeftPanelItems.Clear();
+
 #if ANDROID
-        var internalPath = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
-        LeftPanelItems.Add(new PanelItemModel() { Icon = "disk_dark", Path = internalPath });
+        _ = Task.Run(async () =>
+        {
+            var drives = DriveInfo.GetDrives();
 
-        string externalStoragePath = null;
+            var path = Android.OS.Environment.RootDirectory.AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Root", Icon = "drive2_dark", Path = path });
 
-        var drives = DriveInfo.GetDrives();
+            path = Android.OS.Environment.StorageDirectory?.AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Storage", Icon = "drive1_dark", Path = path });
 
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Public Storage", Icon = "disk_dark", Path = path });
 
-        var downloadsPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-        LeftPanelItems.Add(new PanelItemModel() { Icon = "download2_dark",Path = downloadsPath });
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title="Downloads", Icon = "download2_dark", Path = path });
 
-        var imagesPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures).AbsolutePath;
-        LeftPanelItems.Add(new PanelItemModel() { Icon = "images_dark", Path = imagesPath });
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Camera", Icon = "cam_dark", Path = path });
 
-        var filmPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMovies).AbsolutePath;
-        LeftPanelItems.Add(new PanelItemModel() { Icon = "film_dark", Path = filmPath });
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Pictures", Icon = "image_dark", Path = path });
+
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryScreenshots).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Screenshots", Icon = "ss_dark", Path = path });
+
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Documents", Icon = "docs_dark", Path = path });
+
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Music", Icon = "music_dark", Path = path });
+
+            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMovies).AbsolutePath;
+            if (IsFolderAccesible(path))
+                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Movies", Icon = "film_dark", Path = path });
+        });
 #endif
     }
 
+    private void UpdateRightPanelItems()
+    {
 
-    #region SEARCH
-    private int searcher;
+    }
+
     private async void SearchItem(string name)
     {
-        searcher++;
-        if (searcher > 1)
-            return;
+        CancelLastOperation();
+        var token = GetNewOperationKey();
+        ChangeOperationState(true);
 
-        _ = Task.Run(async () => {
-            if(string.IsNullOrEmpty(name) is false)
-            {
-                var all = GetFilesAndFolders(SelectedFolder.FullPath);
-                if (all is null)
-                    return;
+        await ClearOnlyVisualItems();
 
-                VisualItems.Clear();
-                var filteredFiles = all.Where(item => item.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
-                for (int i = 0; i < filteredFiles.Count(); i++)
-                    VisualItems.Add(filteredFiles.ElementAt(i));
-            } else if(VisualItems.Count != Items.Count)
+        await Task.Run(() =>
+        {
+            if (string.IsNullOrEmpty(name))
             {
-                VisualItems.Clear();
                 for (int i = 0; i < Items.Count; i++)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
                     VisualItems.Add(Items[i]);
+                }
             }
-
-            while (searcher > 0)
-                searcher--;
+            else
+            {
+                var filteredFiles = Items.Where(item => item.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+                for (int i = 0; i < filteredFiles.Count(); i++)
+                {
+                    if (token.IsCancellationRequested)
+                        break;
+                    VisualItems.Add(filteredFiles.ElementAt(i));
+                }
+            }
+            ChangeOperationState(false);
         });
     }
-    #endregion
 
-    private void UpdateNavigation(string path)
+    private async Task UpdateNavigation(ItemModel model)
     {
+        loopBlocker = true;
         Paths.Clear();
-        var navigationFolders = GetFoldersToRoot(path);
-        int index = 0;
-        for (int i = 0; i < navigationFolders?.Count(); i++)
+        await Task.Run(() =>
         {
-            Paths.Add(navigationFolders.ElementAt(i));
-            index++;
-        }
-        SelectedFolder = Paths.Last();
-        NavScrollTo.Execute(--index);
+            var navigationFolders = GetFoldersToRoot(model.FullPath);
+            int index = 0;
+            for (int i = 0; i < navigationFolders?.Count(); i++)
+            {
+                Paths.Add(navigationFolders.ElementAt(i));
+                index++;
+            }
+            AddToBackHistory(SelectedFolder);
+            SelectedFolder = Paths.Last();
+            NavScrollTo.Execute(--index);
+        });
+        loopBlocker = false;
     }
 
     private void SelectItem(ItemModel item)
@@ -144,22 +275,27 @@ public class SharedViewModel : BaseViewModel
             SwitchFolder(item);
     }
 
-    #region SWITCH FOLDER
-    private int switcher;
     private async void SwitchFolder(ItemModel folder)
     {
-        switcher++;
-        if (switcher > 1)
+        if (loopBlocker is true)
             return;
-        await Task.Delay(10);
+
+        CancelLastOperation();
+        var cancelToken = GetNewOperationKey();
+        ChangeOperationState(true);
 
         try
         {
             var all = GetFilesAndFolders(folder.FullPath);
-            ClearItems();
+            await ClearItems();
+            ChangeTabName(folder.Name);
             for (int i = 0; i < all?.Count(); i++)
-                AddItems(all.ElementAt(i));
-            UpdateNavigation(folder.FullPath);
+            {
+                if (cancelToken.IsCancellationRequested)
+                    break;
+                await AddItems(all.ElementAt(i));
+            }
+            await UpdateNavigation(folder);
         }
         catch (System.UnauthorizedAccessException ex)
         {
@@ -172,12 +308,13 @@ public class SharedViewModel : BaseViewModel
         }
         finally
         {
-            while (switcher > 0)
-                switcher--;
-            MyLoadingService.IsLoading = false;
+            ChangeOperationState(false);
+            UpdateRightPanel();
         }
     }
-    #endregion
+
+
+
 
     public static IEnumerable<ItemModel> GetFilesAndFolders(string path)
     {
