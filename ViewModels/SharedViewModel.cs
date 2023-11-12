@@ -120,13 +120,20 @@ public class SharedViewModel : BaseViewModel
     {
         string startPath = string.Empty;
 
+#if WINDOWS
+         startPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+#endif
+
 #if MACCATALYST
         startPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
 #endif
-        //startupFolder = Path.Combine(Environment.GetEnvironmentVariable("EXTERNAL_STORAGE"));
 
 #if ANDROID
-        startPath = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
+#if DEBUG
+        startPath = Android.OS.Environment.StorageDirectory.AbsolutePath;
+#else
+        startPath = Android.OS.Environment.GetExternalStoragePublicDirectory.AbsolutePath;
+#endif
 #endif
 
         UpdateLeftPanel();
@@ -151,7 +158,7 @@ public class SharedViewModel : BaseViewModel
     {
         RightPanelItems.Clear();
 
-        var command = new Command(()=>
+        var command = new Command(() =>
         {
 
         });
@@ -287,6 +294,7 @@ public class SharedViewModel : BaseViewModel
         try
         {
             var all = GetFilesAndFolders(folder.FullPath);
+            await UpdateNavigation(folder);
             await ClearItems();
             ChangeTabName(folder.Name);
             for (int i = 0; i < all?.Count(); i++)
@@ -295,7 +303,6 @@ public class SharedViewModel : BaseViewModel
                     break;
                 await AddItems(all.ElementAt(i));
             }
-            await UpdateNavigation(folder);
         }
         catch (System.UnauthorizedAccessException ex)
         {

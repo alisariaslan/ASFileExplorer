@@ -88,17 +88,22 @@ public class MainViewModel : BaseViewModel
     {
         messenger?.Send(new MessageData(MessageType.REQUEST_ALL_PERMS, this));
 
-#if ANDROID30_0_OR_GREATER
-        permList.Add(new PermModel(PermType.MANAGE_EXTERNAL_STORAGE));
-#else
-		permList.Add(new PermModel(PermType.READ_EXTERNAL_STORAGE));
-		permList.Add(new PermModel(PermType.WRITE_EXTERNAL_STORAGE));
-#endif
-#if ANDROID33_0_OR_GREATER
-        permList.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
-        permList.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
-        permList.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
-#endif
+        var major = DeviceInfo.Version.Major;
+        var build = DeviceInfo.Version.Build;
+
+        if (major > 10)
+            permList.Add(new PermModel(PermType.MANAGE_EXTERNAL_STORAGE));
+        else
+        {
+            permList.Add(new PermModel(PermType.READ_EXTERNAL_STORAGE));
+            permList.Add(new PermModel(PermType.WRITE_EXTERNAL_STORAGE));
+        }
+        if (major > 12)
+        {
+            permList.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
+            permList.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
+            permList.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
+        }
         while (permList.Any(p => p.Permitted is false))
         {
             foreach (var item in permList)
