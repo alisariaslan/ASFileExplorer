@@ -106,6 +106,7 @@
 	  <None Remove="Resources\Fonts\Poppins-Medium.ttf" />
 	  <None Remove="Resources\Fonts\Poppins-Regular.ttf" />
 	  <None Remove="Resources\Fonts\Poppins-SemiBold.ttf" />
+	  <None Remove="Helpers\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <BundleResource Include="Resources\Images\svg\dark\download_dark.svg" />
@@ -128,5 +129,8 @@
 	  <BundleResource Include="Resources\Fonts\Poppins-Medium.ttf" />
 	  <BundleResource Include="Resources\Fonts\Poppins-Regular.ttf" />
 	  <BundleResource Include="Resources\Fonts\Poppins-SemiBold.ttf" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Helpers\" />
 	</ItemGroup>
 </Project>

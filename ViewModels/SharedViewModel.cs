@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using ASFileExplorer.Helpers;
 
 namespace ASFileExplorer;
 
@@ -142,23 +143,17 @@ public class SharedViewModel : BaseViewModel
         SwitchFolder(new ItemModel(startPath));
     }
 
-    public static bool IsFolderAccesible(string path)
-    {
-        try
-        {
-            return Directory.GetFileSystemEntries(path).Any();
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-    }
+
 
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
+<<<<<<< Updated upstream
 
         var command = new Command(() =>
+=======
+        var command = new Command(()=>
+>>>>>>> Stashed changes
         {
 
         });
@@ -176,43 +171,43 @@ public class SharedViewModel : BaseViewModel
             var drives = DriveInfo.GetDrives();
 
             var path = Android.OS.Environment.RootDirectory.AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Root", Icon = "drive2_dark", Path = path });
 
             path = Android.OS.Environment.StorageDirectory?.AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Storage", Icon = "drive1_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Public Storage", Icon = "disk_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title="Downloads", Icon = "download2_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Camera", Icon = "cam_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Pictures", Icon = "image_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryScreenshots).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Screenshots", Icon = "ss_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Documents", Icon = "docs_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Music", Icon = "music_dark", Path = path });
 
             path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMovies).AbsolutePath;
-            if (IsFolderAccesible(path))
+            if (StorageHelper.IsFolderAccesible(path))
                 LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Movies", Icon = "film_dark", Path = path });
         });
 #endif
@@ -262,7 +257,7 @@ public class SharedViewModel : BaseViewModel
         Paths.Clear();
         await Task.Run(() =>
         {
-            var navigationFolders = GetFoldersToRoot(model.FullPath);
+            var navigationFolders = StorageHelper.GetFoldersToRoot(model.FullPath);
             int index = 0;
             for (int i = 0; i < navigationFolders?.Count(); i++)
             {
@@ -293,8 +288,12 @@ public class SharedViewModel : BaseViewModel
 
         try
         {
+<<<<<<< Updated upstream
             var all = GetFilesAndFolders(folder.FullPath);
             await UpdateNavigation(folder);
+=======
+            var all = StorageHelper.GetFilesAndFolders(folder.FullPath);
+>>>>>>> Stashed changes
             await ClearItems();
             ChangeTabName(folder.Name);
             for (int i = 0; i < all?.Count(); i++)
@@ -318,53 +317,5 @@ public class SharedViewModel : BaseViewModel
             ChangeOperationState(false);
             UpdateRightPanel();
         }
-    }
-
-
-
-
-    public static IEnumerable<ItemModel> GetFilesAndFolders(string path)
-    {
-        var folders = GetFoldersInFolder(path);
-        folders = folders?.OrderBy(f => f.Name).ToList();
-        var files = GetFilesInFolder(path);
-        files = files?.OrderBy(f => f.Name).ToList();
-        return folders.Concat(files);
-    }
-
-    public static IEnumerable<ItemModel> GetFilesInFolder(string path)
-    {
-        if (string.IsNullOrEmpty(path))
-            return null;
-        return from fullpath in Directory.GetFiles(path)
-               select new ItemModel()
-               {
-                   FullPath = fullpath,
-                   Type = ItemType.FILE
-               };
-    }
-
-    public static IEnumerable<ItemModel> GetFoldersInFolder(string path)
-    {
-        if (string.IsNullOrEmpty(path))
-            return null;
-        return from title in Directory.GetDirectories(path)
-               select new ItemModel()
-               {
-                   FullPath = title,
-                   Type = ItemType.FOLDER
-               };
-    }
-
-    public static List<ItemModel> GetFoldersToRoot(string path)
-    {
-        var folders = new List<ItemModel>();
-        while (path != null)
-        {
-            string fullpath = Path.GetFullPath(path);
-            folders.Insert(0, new ItemModel() { FullPath = fullpath });
-            path = Path.GetDirectoryName(path);
-        }
-        return folders;
     }
 }
