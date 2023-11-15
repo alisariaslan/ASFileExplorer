@@ -51,14 +51,12 @@ public class SharedViewModel : BaseViewModel
 
     public Command<object> SwitchFolderPreCommand { get; set; }
     public Command<object> RightPanelCommand { get; set; }
-
-    public Command NavScrollTo { get; set; }
+	public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
 
-    //private bool TemplateText_ { get; set; } = "VerticalGrid,2";
-    //public bool TemplateText { get { return TemplateText_; } set { TemplateText_ = value; OnPropertyChanged(nameof(TemplateText)); } }
 
-    private bool firstBlocker;
+
+	private bool firstBlocker;
     private bool loopBlocker;
 
     public SharedViewModel()
@@ -73,6 +71,13 @@ public class SharedViewModel : BaseViewModel
         HistoryForward = new List<ItemModel>();
         RightPanelCommand = new Command<object>(RightPanelExecute);
     }
+
+	public void SetBodyTemplate(BodyDisplayTemplates target)
+	{
+		BodyTemplateSelector.SelectedTemplate = BodyDisplayTemplates.IMAGEROW;
+		UpdateLeftPanel();
+	}
+
 
     private void RightPanelExecute(object obj)
     {
@@ -135,14 +140,11 @@ public class SharedViewModel : BaseViewModel
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
-
-        var model = new RightPanelItemModel() { Icon = "left_dark", DeclaredCommandType = CommandType.BACK };
-        if (HistoryBack.Count > 0)
-            RightPanelItems.Add(model);
-
-        model = new RightPanelItemModel() { Icon = "right_dark", DeclaredCommandType = CommandType.FORWARD };
-        if (HistoryForward.Count > 0)
-            RightPanelItems.Add(model);
+		Task.Run(() =>
+		{
+			var items = RightPanelHelper.GetItems(HistoryBack.Count,HistoryForward.Count);
+			items.ForEach(RightPanelItems.Add);
+		});
     }
 
     private void UpdateLeftPanel()

@@ -25,21 +25,24 @@
 			</Setter>
 		</Style>
 
-		<DataTemplate x:Key="desktopTemplate">
+		<DataTemplate x:Key="template1">
 			<Grid>
-
-			</Grid>
-		</DataTemplate>
-		<DataTemplate x:Key="mobileTemplate">
-			<Grid>
-				<Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
-					<ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked" Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
+				<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
+					<HorizontalStackLayout Spacing="5">
+						<Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
+						<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
+					</HorizontalStackLayout>
 				</Border>
 			</Grid>
 		</DataTemplate>
-		<local:CustomDataTemplateSelector x:Key="customDataTemplateSelector"
-                                          DesktopTemplate="{StaticResource desktopTemplate}"
-                                          MobileTemplate="{StaticResource mobileTemplate}" />
+		<DataTemplate x:Key="template2">
+			<Grid>
+				
+			</Grid>
+		</DataTemplate>
+
+		<local:BodyTemplateSelector x:Key="customDataTemplateSelector"  Template1="{StaticResource template1}" Template2="{StaticResource template2}" />
+
 	</ContentView.Resources>
 
 	<Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
@@ -65,7 +68,17 @@
 
 		<!-- LEFT PANEL (Showcase) -->
 		<Border Grid.Row="1" Grid.Column="0" WidthRequest="50" BackgroundColor="White"  >
-			<CollectionView x:Name="leftCollection" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None"/>
+			<CollectionView x:Name="leftCollection"  ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Grid>
+							<Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
+								<ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked" Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}" />
+							</Border>
+						</Grid>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
 		</Border>
 
 		<!-- RIGHT PANEL (Favorites) -->
@@ -85,20 +98,7 @@
 
 		<!-- BODY -->
 		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView EmptyView="No items to display" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
-				<CollectionView.ItemTemplate>
-					<DataTemplate>
-						<Grid>
-							<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
-								<HorizontalStackLayout Spacing="5">
-									<Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
-
-									<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
-								</HorizontalStackLayout>
-							</Border>
-						</Grid>
-					</DataTemplate>
-				</CollectionView.ItemTemplate>
+			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
 			</CollectionView>
 		</Border>
 
