@@ -5,125 +5,134 @@
              xmlns:local="clr-namespace:ASFileExplorer"
              Loaded="ContentView_Loaded">
 
-    <ContentView.BindingContext>
-        <local:SharedViewModel />
-    </ContentView.BindingContext>
+	<ContentView.BindingContext>
+		<local:SharedViewModel />
+	</ContentView.BindingContext>
 
-    <ContentView.Resources>
-        <Style TargetType="Grid">
-            <Setter Property="VisualStateManager.VisualStateGroups">
-                <VisualStateGroupList>
-                    <VisualStateGroup x:Name="CommonStates">
-                        <VisualState x:Name="Normal" />
-                        <VisualState x:Name="Selected">
-                            <VisualState.Setters>
-                                <Setter Property="BackgroundColor" Value="LightGray" />
-                            </VisualState.Setters>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateGroupList>
-            </Setter>
-        </Style>
+	<ContentView.Resources>
+		<Style TargetType="Grid">
+			<Setter Property="VisualStateManager.VisualStateGroups">
+				<VisualStateGroupList>
+					<VisualStateGroup x:Name="CommonStates">
+						<VisualState x:Name="Normal" />
+						<VisualState x:Name="Selected">
+							<VisualState.Setters>
+								<Setter Property="BackgroundColor" Value="LightGray" />
+							</VisualState.Setters>
+						</VisualState>
+					</VisualStateGroup>
+				</VisualStateGroupList>
+			</Setter>
+		</Style>
 
-        <DataTemplate x:Key="desktopTemplate">
-            <Grid>
+		<DataTemplate x:Key="desktopTemplate">
+			<Grid>
 
-            </Grid>
-        </DataTemplate>
-        <DataTemplate x:Key="mobileTemplate">
-            <Grid>
-                <Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
-                    <ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
-                </Border>
-            </Grid>
-        </DataTemplate>
-        <local:CustomDataTemplateSelector x:Key="customDataTemplateSelector"
+			</Grid>
+		</DataTemplate>
+		<DataTemplate x:Key="mobileTemplate">
+			<Grid>
+				<Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
+					<ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked" Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=SwitchFolderPreCommand}" CommandParameter="{Binding Path}"/>
+				</Border>
+			</Grid>
+		</DataTemplate>
+		<local:CustomDataTemplateSelector x:Key="customDataTemplateSelector"
                                           DesktopTemplate="{StaticResource desktopTemplate}"
                                           MobileTemplate="{StaticResource mobileTemplate}" />
-    </ContentView.Resources>
+	</ContentView.Resources>
 
-    <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="Auto,*,50">
+	<Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="Auto,*,Auto">
 
-        <!-- TOP PANEL (SEARCH) -->
-        <Border Grid.Row="0" Grid.ColumnSpan="3"  HeightRequest="50" BackgroundColor="White">
-            <Grid ColumnDefinitions="40,*,40">
+		<!-- TOP PANEL (SEARCH) -->
+		<Border Grid.Row="0" Grid.ColumnSpan="3"  HeightRequest="50" BackgroundColor="White">
+			<Grid ColumnDefinitions="40,*,40">
 
-                <Border  Grid.Column="0" StrokeShape="RoundRectangle 8" Margin="5,5,0,5" Padding="5">
-                    <Image Source="search_dark"/>
-                </Border>
+				<Border  Grid.Column="0" StrokeShape="RoundRectangle 8" Margin="5,5,0,5" Padding="5">
+					<Image Source="search_dark"/>
+				</Border>
 
-                <Border Grid.Column="1"  StrokeShape="RoundRectangle 4" BackgroundColor="#fff" Margin="5">
-                    <Entry Placeholder="Search file or execute command" Text="{Binding SearchText}" />
-                </Border>
+				<Border Grid.Column="1"  StrokeShape="RoundRectangle 4" BackgroundColor="#fff" Margin="5">
+					<Entry Placeholder="Search file or execute command" Text="{Binding SearchText}" />
+				</Border>
 
-                <Border  Grid.Column="2" StrokeShape="RoundRectangle 8" Margin="0,5,5,5" Padding="5">
-                    <Image Source="terminal_dark"/>
-                </Border>
+				<Border  Grid.Column="2" StrokeShape="RoundRectangle 8" Margin="0,5,5,5" Padding="5">
+					<Image Source="terminal_dark"/>
+				</Border>
 
-            </Grid>
-        </Border>
+			</Grid>
+		</Border>
 
-        <!-- LEFT PANEL (Showcase) -->
-        <Border Grid.Row="1" Grid.Column="0" WidthRequest="50" BackgroundColor="White"  >
-            <CollectionView ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None"/>
-        </Border>
+		<!-- LEFT PANEL (Showcase) -->
+		<Border Grid.Row="1" Grid.Column="0" WidthRequest="50" BackgroundColor="White"  >
+			<CollectionView x:Name="leftCollection" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="VerticalList" ItemsSource="{Binding LeftPanelItems}" SelectionMode="None"/>
+		</Border>
 
-        <!-- RIGHT PANEL (Favorites) -->
-        <Border Grid.Row="1" Grid.Column="2"  BackgroundColor="White"  >
+		<!-- RIGHT PANEL (Favorites) -->
+		<Border Grid.Row="1" Grid.Column="2" WidthRequest="50" BackgroundColor="White">
+			<CollectionView ItemsLayout="VerticalList" ItemsSource="{Binding RightPanelItems}" SelectionMode="None">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Grid>
+							<Border Stroke="Black" StrokeShape="RoundRectangle 8" Margin="5" Padding="5" HeightRequest="40">
+								<ImageButton Source="{Binding Icon}" Clicked="ImageButton_Clicked" Command="{Binding Source={RelativeSource AncestorType={x:Type local:SharedViewModel}}, Path=RightPanelCommand}" CommandParameter="{Binding DeclaredCommandType}"/>
+							</Border>
+						</Grid>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</Border>
 
-        </Border>
+		<!-- BODY -->
+		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
+			<CollectionView EmptyView="No items to display" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Grid>
+							<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
+								<HorizontalStackLayout Spacing="5">
+									<Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
 
-        <!-- BODY -->
-        <Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-            <CollectionView EmptyView="No items to display" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
-                                <HorizontalStackLayout Spacing="5">
-                                    <Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
+									<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
+								</HorizontalStackLayout>
+							</Border>
+						</Grid>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</Border>
 
-                                    <Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
-                                </HorizontalStackLayout>
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Border>
+		<!-- NAVIGATION -->
+		<Border Grid.Row="2" Grid.ColumnSpan="3" HeightRequest="40"  VerticalOptions="Start" BackgroundColor="White">
+			<CollectionView x:Name="cv_nav" ItemsLayout="HorizontalList" ItemsSource="{Binding Paths}" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}">
+				<CollectionView.ItemTemplate>
+					<DataTemplate>
+						<Grid>
+							<Border Padding="4" MinimumWidthRequest="{OnPlatform Android=30,iOS=30,WinUI=90,MacCatalyst=30}">
+								<Label FontSize="14" Text="{Binding Name,StringFormat='/{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
+							</Border>
+						</Grid>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+			</CollectionView>
+		</Border>
 
-        <!-- NAVIGATION -->
-        <Border Grid.Row="2" Grid.ColumnSpan="3" HeightRequest="40"  VerticalOptions="Start" BackgroundColor="White">
-            <CollectionView x:Name="cv_nav" ItemsLayout="HorizontalList" ItemsSource="{Binding Paths}" SelectionMode="Single" SelectedItem="{Binding SelectedFolder}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid>
-                            <Border Padding="4" MinimumWidthRequest="{OnPlatform Android=30,iOS=30,WinUI=90,MacCatalyst=30}">
-                                <Label FontSize="14" Text="{Binding Name,StringFormat='/{0}'}" TextColor="Black" VerticalTextAlignment="Center" />
-                            </Border>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Border>
+		<!-- TOOLBAR -->
+		<Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" VerticalOptions="Start" BackgroundColor="White">
+			<ScrollView Orientation="Horizontal">
+				<HorizontalStackLayout>
 
-        <!-- TOOLBAR -->
-        <Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" VerticalOptions="Start" BackgroundColor="White">
-            <ScrollView Orientation="Horizontal">
-                <HorizontalStackLayout>
-
-                    <ImageButton Grid.Row="2"  Grid.Column="2" Source="copy_light" WidthRequest="40" />
+					<ImageButton Grid.Row="2"  Grid.Column="2" Source="copy_light" WidthRequest="40" />
 
 
-                    <ImageButton Grid.Row="2"  Grid.Column="0" Source="paste_light" WidthRequest="40"  />
+					<ImageButton Grid.Row="2"  Grid.Column="0" Source="paste_light" WidthRequest="40"  />
 
-                </HorizontalStackLayout>
+				</HorizontalStackLayout>
 
-            </ScrollView>
-        </Border>
+			</ScrollView>
+		</Border>
 
-        <!--<Grid Grid.RowSpan="4" Grid.ColumnSpan="3" RowDefinitions="*,*,*" IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity=".25">
+		<!--<Grid Grid.RowSpan="4" Grid.ColumnSpan="3" RowDefinitions="*,*,*" IsVisible="{Binding IsLoading}" BackgroundColor="Black" Opacity=".25">
             <VerticalStackLayout Grid.Row="2" VerticalOptions="Center">
                 <ProgressBar Progress="{Binding LoadProgress}" ProgressColor="White" WidthRequest="50" HeightRequest="10" VerticalOptions="Center"/>
                 <Label Text="{Binding LoadDesc}" TextColor="White" HorizontalTextAlignment="Center"/>
@@ -131,7 +140,7 @@
             <Button Opacity="0"/>
         </Grid>-->
 
-    </Grid>
+	</Grid>
 
 </ContentView>
 

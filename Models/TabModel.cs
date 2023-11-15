@@ -27,4 +27,8 @@ public class TabModel : PropertyNotifier , TabInterface
         OnPropertyChanged(nameof(Name));
     }
 
+    public bool GetOperationState()
+    {
+        return OnOperation;
+    }
 }

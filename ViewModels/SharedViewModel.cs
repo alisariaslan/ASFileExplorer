@@ -35,8 +35,7 @@ public class SharedViewModel : BaseViewModel
             if (firstBlocker)
                 firstBlocker = false;
             else
-                SwitchFolder(value);
-
+                SwitchFolder(value,null);
         }
     }
     private string SearchText_ { get; set; }
@@ -51,13 +50,13 @@ public class SharedViewModel : BaseViewModel
     }
 
     public Command<object> SwitchFolderPreCommand { get; set; }
-    public Command<object> RightpanelCommand { get; set; }
+    public Command<object> RightPanelCommand { get; set; }
 
     public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
 
-    private string TemplateText_ { get; set; } = "VerticalGrid,2";
-    public string TemplateText { get { return TemplateText_; } set { TemplateText_ = value; OnPropertyChanged(nameof(TemplateText)); } }
+    //private bool TemplateText_ { get; set; } = "VerticalGrid,2";
+    //public bool TemplateText { get { return TemplateText_; } set { TemplateText_ = value; OnPropertyChanged(nameof(TemplateText)); } }
 
     private bool firstBlocker;
     private bool loopBlocker;
@@ -72,23 +71,32 @@ public class SharedViewModel : BaseViewModel
         SwitchFolderPreCommand = new Command<object>(SwitchFolderPre);
         HistoryBack = new List<ItemModel>();
         HistoryForward = new List<ItemModel>();
-        RightpanelCommand = new Command<object>(RightPanelExecute);
+        RightPanelCommand = new Command<object>(RightPanelExecute);
     }
 
     private void RightPanelExecute(object obj)
     {
-
-    }
-
-    private void AddToBackHistory(ItemModel model)
-    {
-        HistoryBack.Add(model);
+        var type = (CommandType)obj;
+        switch (type)
+        {
+            case CommandType.BACK:
+                var last1 = HistoryBack.LastOrDefault();
+                HistoryForward.Add(SelectedFolder);
+                HistoryBack.Remove(last1);
+                SwitchFolder(last1,"noHistory");
+                break;
+            case CommandType.FORWARD:
+                var forw1 = HistoryForward.LastOrDefault();
+                HistoryForward.Remove(forw1);
+                SwitchFolder(forw1, null);
+                break;
+        }
     }
 
     private void SwitchFolderPre(object path)
     {
         var item = LeftPanelItems.FirstOrDefault(i => i.Path.Equals(path));
-        SwitchFolder(new ItemModel(item.Path));
+        SwitchFolder(new ItemModel(item.Path),null);
     }
 
     private async Task ClearItems()
@@ -119,108 +127,37 @@ public class SharedViewModel : BaseViewModel
 
     public override void OnAppear()
     {
-        string startPath = string.Empty;
-
-#if WINDOWS
-         startPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-#endif
-
-#if MACCATALYST
-        startPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
-#endif
-
-#if ANDROID
-#if DEBUG
-        startPath = Android.OS.Environment.StorageDirectory.AbsolutePath;
-#else
-        startPath = Android.OS.Environment.GetExternalStoragePublicDirectory.AbsolutePath;
-#endif
-#endif
-
         UpdateLeftPanel();
-
         firstBlocker = true;
-        SwitchFolder(new ItemModel(startPath));
+        SwitchFolder(new ItemModel(StartHelper.GetStartFolder()),"noHistory");
     }
-
-
 
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
-<<<<<<< Updated upstream
 
-        var command = new Command(() =>
-=======
-        var command = new Command(()=>
->>>>>>> Stashed changes
-        {
+        var model = new RightPanelItemModel() { Icon = "left_dark", DeclaredCommandType = CommandType.BACK };
+        if (HistoryBack.Count > 0)
+            RightPanelItems.Add(model);
 
-        });
-        var model = new RightPanelItemModel() { DeclaredCommandType = CommandType.BACK, DeclaredCommand = command };
-        RightPanelItems.Add(model);
+        model = new RightPanelItemModel() { Icon = "right_dark", DeclaredCommandType = CommandType.FORWARD };
+        if (HistoryForward.Count > 0)
+            RightPanelItems.Add(model);
     }
 
     private void UpdateLeftPanel()
     {
         LeftPanelItems.Clear();
-
-#if ANDROID
-        _ = Task.Run(async () =>
+        Task.Run(() =>
         {
-            var drives = DriveInfo.GetDrives();
-
-            var path = Android.OS.Environment.RootDirectory.AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Root", Icon = "drive2_dark", Path = path });
-
-            path = Android.OS.Environment.StorageDirectory?.AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Storage", Icon = "drive1_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(string.Empty).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Public Storage", Icon = "disk_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title="Downloads", Icon = "download2_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDcim).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Camera", Icon = "cam_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryPictures).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Pictures", Icon = "image_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryScreenshots).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Screenshots", Icon = "ss_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Documents", Icon = "docs_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Music", Icon = "music_dark", Path = path });
-
-            path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMovies).AbsolutePath;
-            if (StorageHelper.IsFolderAccesible(path))
-                LeftPanelItems.Add(new LeftPanelItemModel() { Title = "Movies", Icon = "film_dark", Path = path });
+            var items = LeftPanelHelper.GetItems();
+            items.ForEach(LeftPanelItems.Add);
         });
-#endif
-    }
-
-    private void UpdateRightPanelItems()
-    {
-
     }
 
     private async void SearchItem(string name)
     {
-        CancelLastOperation();
+        await CancelLastOperation();
         var token = GetNewOperationKey();
         ChangeOperationState(true);
 
@@ -251,7 +188,7 @@ public class SharedViewModel : BaseViewModel
         });
     }
 
-    private async Task UpdateNavigation(ItemModel model)
+    private async Task UpdateNavigation(ItemModel model, object? param)
     {
         loopBlocker = true;
         Paths.Clear();
@@ -264,7 +201,9 @@ public class SharedViewModel : BaseViewModel
                 Paths.Add(navigationFolders.ElementAt(i));
                 index++;
             }
-            AddToBackHistory(SelectedFolder);
+            if (param is not ("noHistory"))
+                HistoryBack.Add(SelectedFolder);
+            UpdateRightPanel();
             SelectedFolder = Paths.Last();
             NavScrollTo.Execute(--index);
         });
@@ -274,26 +213,22 @@ public class SharedViewModel : BaseViewModel
     private void SelectItem(ItemModel item)
     {
         if (item?.Type is ItemType.FOLDER)
-            SwitchFolder(item);
+            SwitchFolder(item,null);
     }
 
-    private async void SwitchFolder(ItemModel folder)
+    private async void SwitchFolder(ItemModel folder,object param)
     {
         if (loopBlocker is true)
             return;
 
-        CancelLastOperation();
+        await CancelLastOperation();
         var cancelToken = GetNewOperationKey();
         ChangeOperationState(true);
 
         try
         {
-<<<<<<< Updated upstream
-            var all = GetFilesAndFolders(folder.FullPath);
-            await UpdateNavigation(folder);
-=======
             var all = StorageHelper.GetFilesAndFolders(folder.FullPath);
->>>>>>> Stashed changes
+            await UpdateNavigation(folder,param);
             await ClearItems();
             ChangeTabName(folder.Name);
             for (int i = 0; i < all?.Count(); i++)

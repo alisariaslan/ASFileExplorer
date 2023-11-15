@@ -22,9 +22,11 @@ public class BaseViewModel : PropertyNotifier, TabInterface
         //StartLoad(null);
     }
 
-    public void CancelLastOperation()
+    public async Task CancelLastOperation()
     {
         LocalOperations.LastOrDefault()?.Cancel();
+        while (MyTab.GetOperationState())
+            await Task.Delay(100);
     }
 
     public void ChangeOperationState(bool state)
@@ -42,6 +44,11 @@ public class BaseViewModel : PropertyNotifier, TabInterface
         LocalOperations.Add(new OperationModel(LocalOperations.Count));
         return LocalOperations.Last().cancellationToken;
 
+    }
+
+    public bool GetOperationState()
+    {
+        return MyTab.GetOperationState();
     }
 
     //public virtual void StartLoad(string desc)

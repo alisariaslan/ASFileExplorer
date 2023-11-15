@@ -20,7 +20,8 @@ public class StorageHelper
         items = items?.OrderBy(f => f.Name).ToList();
         var files = GetFilesInFolder(path);
         files = files?.OrderBy(f => f.Name).ToList();
-        items.ForEach(files.Add);
+        foreach (var item in files)
+            items.Add(item);
         return items;
     }
 
