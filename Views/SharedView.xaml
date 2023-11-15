@@ -10,6 +10,7 @@
 	</ContentView.BindingContext>
 
 	<ContentView.Resources>
+
 		<Style TargetType="Grid">
 			<Setter Property="VisualStateManager.VisualStateGroups">
 				<VisualStateGroupList>
@@ -35,13 +36,45 @@
 				</Border>
 			</Grid>
 		</DataTemplate>
+
 		<DataTemplate x:Key="template2">
 			<Grid>
-				
+				<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="75">
+					<HorizontalStackLayout Spacing="5">
+						<Image WidthRequest="40" HeightRequest="40">
+							<Image.Triggers>
+								<DataTrigger TargetType="Image" Binding="{Binding IsImageSourceAvaible}" Value="True">
+									<Setter Property="Source" Value="{Binding ImageSource}" />
+								</DataTrigger>
+								<DataTrigger TargetType="Image" Binding="{Binding IsImageSourceAvaible}" Value="False">
+									<Setter Property="Source" Value="{Binding ImageSourceString}" />
+								</DataTrigger>
+							</Image.Triggers>
+						</Image>
+						<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
+					</HorizontalStackLayout>
+				</Border>
 			</Grid>
 		</DataTemplate>
 
-		<local:BodyTemplateSelector x:Key="customDataTemplateSelector"  Template1="{StaticResource template1}" Template2="{StaticResource template2}" />
+		<DataTemplate x:Key="template3">
+			<Grid>
+				<Border Padding="4" MaximumHeightRequest="150">
+						<Image>
+							<Image.Triggers>
+								<DataTrigger TargetType="Image" Binding="{Binding IsImageSourceAvaible}" Value="True">
+									<Setter Property="Source" Value="{Binding ImageSource}" />
+								</DataTrigger>
+								<DataTrigger TargetType="Image" Binding="{Binding IsImageSourceAvaible}" Value="False">
+									<Setter Property="Source" Value="{Binding ImageSourceString}" />
+								</DataTrigger>
+							</Image.Triggers>
+						</Image>
+				</Border>
+			</Grid>
+		</DataTemplate>
+
+		<local:BodyTemplateSelector x:Key="customDataTemplateSelector"  Template1="{StaticResource template1}" Template2="{StaticResource template2}" Template3="{StaticResource template3}" />
 
 	</ContentView.Resources>
 
@@ -98,7 +131,18 @@
 
 		<!-- BODY -->
 		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsLayout="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+				<CollectionView.Triggers>
+					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="0">
+						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" />
+					</DataTrigger>
+					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="1">
+						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalGrid,2',MacCatalyst='VerticalGrid,6'}" />
+					</DataTrigger>
+					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="2">
+						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalGrid,2',MacCatalyst='VerticalGrid,6'}" />
+					</DataTrigger>
+				</CollectionView.Triggers>
 			</CollectionView>
 		</Border>
 

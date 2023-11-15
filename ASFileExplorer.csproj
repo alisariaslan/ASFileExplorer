@@ -107,6 +107,9 @@
 	  <None Remove="Resources\Fonts\Poppins-Regular.ttf" />
 	  <None Remove="Resources\Fonts\Poppins-SemiBold.ttf" />
 	  <None Remove="Helpers\" />
+	  <None Remove="Resources\Images\svg\dark\diamond_dark.svg" />
+	  <None Remove="Resources\Images\svg\light\diamond_light.svg" />
+	  <None Remove="Resources\Images\embed\file_dark.svg" />
 	</ItemGroup>
 	<ItemGroup>
 	  <BundleResource Include="Resources\Images\svg\dark\download_dark.svg" />
@@ -129,5 +132,10 @@
 	  <BundleResource Include="Resources\Fonts\Poppins-Medium.ttf" />
 	  <BundleResource Include="Resources\Fonts\Poppins-Regular.ttf" />
 	  <BundleResource Include="Resources\Fonts\Poppins-SemiBold.ttf" />
+	  <BundleResource Include="Resources\Images\svg\dark\diamond_dark.svg" />
+	  <BundleResource Include="Resources\Images\svg\light\diamond_light.svg" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Images\embed\file_dark.svg" />
 	</ItemGroup>
 </Project>

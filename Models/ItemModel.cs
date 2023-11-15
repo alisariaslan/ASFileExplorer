@@ -1,4 +1,8 @@
-﻿namespace ASFileExplorer;
+﻿using System;
+using System.IO;
+using Microsoft.Maui.Controls;
+
+namespace ASFileExplorer;
 
 public enum ItemType
 {
@@ -13,7 +17,7 @@ public enum FileType
     ARCHIVE
 }
 
-public class ItemModel 
+public class ItemModel
 {
     public int Index { get; set; }
     public string Name { get { return Path.GetFileName(FullPath); } }
@@ -27,6 +31,34 @@ public class ItemModel
         get
         {
             return Directory.Exists(FullPath);
+        }
+    }
+
+    public bool IsImageSourceAvaible
+    {
+        get
+        {
+            if (this.ImageSource is null)
+                return false;
+            else return true;
+        }
+    }
+
+    public ImageSource ImageSource
+    {
+        get
+        {
+            try
+            {
+                if (Type is not ItemType.FILE && !Extension.Equals("jpg"))
+                    throw new Exception(null);
+                var bytes = File.ReadAllBytes(FullPath);
+                return ImageSource.FromStream(() => new MemoryStream(bytes));
+            }
+            catch (System.Exception ex)
+            {
+                return null;
+            }
         }
     }
 

@@ -1,15 +1,10 @@
-﻿using System.Data;
-
-namespace ASFileExplorer;
+﻿namespace ASFileExplorer;
 
 public enum CommandType
 {
     BACK,
     FORWARD,
-    CHANGE_SELECTION_MODE,
-    SELECT_ALL,
-    COPY,
-    PASTE
+    SWITCH_DISPLAY
 }
 
 public class LeftPanelItemModel
@@ -24,7 +19,6 @@ public class RightPanelItemModel : PropertyNotifier
 {
     public string Icon { get; set; }
     public CommandType DeclaredCommandType { get; set; }
-    public Command DeclaredCommand { get; set; }
 
 }
 

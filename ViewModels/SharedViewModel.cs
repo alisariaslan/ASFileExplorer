@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using ASFileExplorer.Helpers;
 
 namespace ASFileExplorer;
@@ -54,10 +55,10 @@ public class SharedViewModel : BaseViewModel
 	public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
 
-
-
 	private bool firstBlocker;
     private bool loopBlocker;
+
+    public int BodyLayoutType { get { return (int)BodyTemplateSelector.SelectedTemplate; } }
 
     public SharedViewModel()
     {
@@ -72,12 +73,19 @@ public class SharedViewModel : BaseViewModel
         RightPanelCommand = new Command<object>(RightPanelExecute);
     }
 
-	public void SetBodyTemplate(BodyDisplayTemplates target)
+	private void SetBodyTemplate(BodyDisplayTemplates target)
 	{
-		BodyTemplateSelector.SelectedTemplate = BodyDisplayTemplates.IMAGEROW;
-		UpdateLeftPanel();
+		BodyTemplateSelector.SelectedTemplate = target;
+        OnPropertyChanged(nameof(BodyLayoutType));
+        SwitchFolder(SelectedFolder,"noHistory");
 	}
 
+    private void SwitchBodyTemplate()
+    {
+        BodyDisplayTemplates template = BodyTemplateSelector.SelectedTemplate;
+        int index = ((int)template + 1) % Enum.GetValues(typeof(BodyDisplayTemplates)).Length;
+        SetBodyTemplate((BodyDisplayTemplates)index);
+    }
 
     private void RightPanelExecute(object obj)
     {
@@ -94,6 +102,10 @@ public class SharedViewModel : BaseViewModel
                 var forw1 = HistoryForward.LastOrDefault();
                 HistoryForward.Remove(forw1);
                 SwitchFolder(forw1, null);
+                break;
+
+            case CommandType.SWITCH_DISPLAY:
+                SwitchBodyTemplate();
                 break;
         }
     }
