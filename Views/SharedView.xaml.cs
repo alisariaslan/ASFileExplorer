@@ -26,6 +26,7 @@ public partial class SharedView : ContentView
         initialized = true;
 
         var vm = this.BindingContext as SharedViewModel;
+        vm.bodyTemplateSelector = GetObjectFromResources("customDataTemplateSelector") as BodyTemplateSelector;
 		vm.NavScrollTo = new Command<int>(NavScrollTo);
         vm.MyLoadingService = loadingService;
         vm.MyTab = tab;
@@ -46,6 +47,11 @@ public partial class SharedView : ContentView
 	{
 		return this.Resources[$"template_{template.ToString().ToLower()}"] as DataTemplate;
 	}
+
+    private object GetObjectFromResources(string obj)
+    {
+        return this.Resources[obj];
+    }
 
 
 }

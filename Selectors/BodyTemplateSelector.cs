@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace ASFileExplorer;
+﻿namespace ASFileExplorer;
 
 public enum BodyDisplayTemplates
 {
@@ -11,7 +9,7 @@ public enum BodyDisplayTemplates
 
 public class BodyTemplateSelector : DataTemplateSelector
 {
-	public static BodyDisplayTemplates SelectedTemplate;
+	public BodyDisplayTemplates SelectedTemplate;
 	public DataTemplate Template1 { get; set; }
 	public DataTemplate Template2 { get; set; }
     public DataTemplate Template3 { get; set; } 

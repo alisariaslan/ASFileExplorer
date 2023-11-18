@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using ASFileExplorer.Helpers;
+using static Android.Graphics.ColorSpace;
 
 namespace ASFileExplorer;
 
@@ -36,7 +37,7 @@ public class SharedViewModel : BaseViewModel
             if (firstBlocker)
                 firstBlocker = false;
             else
-                SwitchFolder(value,null);
+                SwitchFolder(value, null);
         }
     }
     private string SearchText_ { get; set; }
@@ -52,13 +53,23 @@ public class SharedViewModel : BaseViewModel
 
     public Command<object> SwitchFolderPreCommand { get; set; }
     public Command<object> RightPanelCommand { get; set; }
-	public Command NavScrollTo { get; set; }
+    public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
 
-	private bool firstBlocker;
+    private bool firstBlocker;
     private bool loopBlocker;
+    public BodyTemplateSelector bodyTemplateSelector { get; set; }
 
-    public int BodyLayoutType { get { return (int)BodyTemplateSelector.SelectedTemplate; } }
+    public int BodyLayoutType
+    {
+        get
+        {
+            if (bodyTemplateSelector is null)
+                return 0;
+            else
+                return (int)bodyTemplateSelector.SelectedTemplate;
+        }
+    }
 
     public SharedViewModel()
     {
@@ -73,16 +84,19 @@ public class SharedViewModel : BaseViewModel
         RightPanelCommand = new Command<object>(RightPanelExecute);
     }
 
-	private void SetBodyTemplate(BodyDisplayTemplates target)
-	{
-		BodyTemplateSelector.SelectedTemplate = target;
-        OnPropertyChanged(nameof(BodyLayoutType));
-        SwitchFolder(SelectedFolder,"noHistory");
-	}
-
-    private void SwitchBodyTemplate()
+    private void SetBodyTemplate(BodyDisplayTemplates target)
     {
-        BodyDisplayTemplates template = BodyTemplateSelector.SelectedTemplate;
+        if (bodyTemplateSelector is not null)
+            bodyTemplateSelector.SelectedTemplate = target;
+        OnPropertyChanged(nameof(BodyLayoutType));
+        SwitchFolder(SelectedFolder, "noHistory");
+    }
+
+    private async void SwitchBodyTemplate()
+    {
+        await CancelLastOperation();
+        VisualItems.Clear();
+        BodyDisplayTemplates template = bodyTemplateSelector is not null ? bodyTemplateSelector.SelectedTemplate : BodyDisplayTemplates.SIMPLEROW;
         int index = ((int)template + 1) % Enum.GetValues(typeof(BodyDisplayTemplates)).Length;
         SetBodyTemplate((BodyDisplayTemplates)index);
     }
@@ -96,7 +110,7 @@ public class SharedViewModel : BaseViewModel
                 var last1 = HistoryBack.LastOrDefault();
                 HistoryForward.Add(SelectedFolder);
                 HistoryBack.Remove(last1);
-                SwitchFolder(last1,"noHistory");
+                SwitchFolder(last1, "noHistory");
                 break;
             case CommandType.FORWARD:
                 var forw1 = HistoryForward.LastOrDefault();
@@ -113,7 +127,7 @@ public class SharedViewModel : BaseViewModel
     private void SwitchFolderPre(object path)
     {
         var item = LeftPanelItems.FirstOrDefault(i => i.Path.Equals(path));
-        SwitchFolder(new ItemModel(item.Path),null);
+        SwitchFolder(new ItemModel(item.Path), null);
     }
 
     private async Task ClearItems()
@@ -133,30 +147,22 @@ public class SharedViewModel : BaseViewModel
         });
     }
 
-    private async Task AddItems(ItemModel model)
-    {
-        await Task.Run(() =>
-        {
-            Items.Add(model);
-            VisualItems.Add(model);
-        });
-    }
 
     public override void OnAppear()
     {
         UpdateLeftPanel();
         firstBlocker = true;
-        SwitchFolder(new ItemModel(StartHelper.GetStartFolder()),"noHistory");
+        SwitchFolder(new ItemModel(StartHelper.GetStartFolder()), "noHistory");
     }
 
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
-		Task.Run(() =>
-		{
-			var items = RightPanelHelper.GetItems(HistoryBack.Count,HistoryForward.Count);
-			items.ForEach(RightPanelItems.Add);
-		});
+        Task.Run(() =>
+        {
+            var items = RightPanelHelper.GetItems(HistoryBack.Count, HistoryForward.Count);
+            items.ForEach(RightPanelItems.Add);
+        });
     }
 
     private void UpdateLeftPanel()
@@ -227,10 +233,10 @@ public class SharedViewModel : BaseViewModel
     private void SelectItem(ItemModel item)
     {
         if (item?.Type is ItemType.FOLDER)
-            SwitchFolder(item,null);
+            SwitchFolder(item, null);
     }
 
-    private async void SwitchFolder(ItemModel folder,object param)
+    private async void SwitchFolder(ItemModel folder, object param)
     {
         if (loopBlocker is true)
             return;
@@ -242,14 +248,20 @@ public class SharedViewModel : BaseViewModel
         try
         {
             var all = StorageHelper.GetFilesAndFolders(folder.FullPath);
-            await UpdateNavigation(folder,param);
+            await UpdateNavigation(folder, param);
             await ClearItems();
             ChangeTabName(folder.Name);
+            CalculateInside();
+
             for (int i = 0; i < all?.Count(); i++)
             {
                 if (cancelToken.IsCancellationRequested)
                     break;
-                await AddItems(all.ElementAt(i));
+                await Task.Run(() =>
+                {
+                    Items.Add(all.ElementAt(i));
+                    VisualItems.Add(all.ElementAt(i));
+                });
             }
         }
         catch (System.UnauthorizedAccessException ex)
@@ -266,5 +278,13 @@ public class SharedViewModel : BaseViewModel
             ChangeOperationState(false);
             UpdateRightPanel();
         }
+    }
+
+    private void CalculateInside()
+    {
+        Task.Run(() =>
+        {
+
+        });
     }
 }

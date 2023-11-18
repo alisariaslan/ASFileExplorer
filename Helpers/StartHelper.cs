@@ -2,16 +2,16 @@
 
 public class StartHelper
 {
-	public static string GetStartFolder()
-	{
+    public static string GetStartFolder()
+    {
         var pathList = new List<string>();
 
 #if WINDOWS
-         startPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+         pathList.Add(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
 #endif
 
 #if MACCATALYST
-        startPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"));
+        pathList.Add(Path.Combine(Environment.GetEnvironmentVariable("HOME")));
 #endif
 
 #if ANDROID

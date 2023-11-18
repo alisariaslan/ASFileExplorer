@@ -6,9 +6,10 @@ public class LeftPanelHelper
     public static List<LeftPanelItemModel> GetItems()
     {
         var list = new List<LeftPanelItemModel>();
-#if ANDROID
 
         var drives = DriveInfo.GetDrives();
+
+#if ANDROID
 
         var path = Android.OS.Environment.RootDirectory.AbsolutePath;
         if (StorageHelper.IsFolderAccesible(path))
@@ -49,9 +50,9 @@ public class LeftPanelHelper
         path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMovies).AbsolutePath;
         if (StorageHelper.IsFolderAccesible(path))
             list.Add(new LeftPanelItemModel() { Title = "Movies", Icon = "film_dark", Path = path });
+#endif
 
         return list;
-#endif
     }
 }
 

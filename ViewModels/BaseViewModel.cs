@@ -5,8 +5,9 @@ public class BaseViewModel : PropertyNotifier, TabInterface
     public List<OperationModel> LocalOperations;
     public TabModel MyTab;
 
-    //private bool IsLoading_ { get; set; }
-    //public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); } }
+    private bool IsLoading_ { get; set; }
+    public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(IsNotLoading)); } }
+    public bool IsNotLoading { get { return !IsLoading_; } }
 
     //private double LoadProgress_ { get; set; }
     //public double LoadProgress { get { return LoadProgress_; } set { LoadProgress_ = value; OnPropertyChanged(nameof(LoadProgress)); } }
@@ -32,6 +33,7 @@ public class BaseViewModel : PropertyNotifier, TabInterface
     public void ChangeOperationState(bool state)
     {
         MyTab.ChangeOperationState(state);
+        IsLoading = state;
     }
 
     public void ChangeTabName(string newName)

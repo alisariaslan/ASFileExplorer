@@ -68,11 +68,8 @@ public class ItemModel
         {
             if (Type == ItemType.FOLDER)
                 return "folder_dark";
-            switch (Extension)
-            {
-                default:
-                    return "file_dark";
-            }
+            else
+                return "file_dark";
         }
     }
 

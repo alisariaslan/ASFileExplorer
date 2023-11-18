@@ -16,7 +16,7 @@ public class RightPanelHelper
 		if (hfc > 0)
 			list.Add(model);
 
-        model = new RightPanelItemModel() { Icon = "diamond_dark", DeclaredCommandType = CommandType.SWITCH_DISPLAY };
+        model = new RightPanelItemModel() { Icon = "col_dark", DeclaredCommandType = CommandType.SWITCH_DISPLAY };
             list.Add(model);
 
         return list;
