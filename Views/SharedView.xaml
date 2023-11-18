@@ -163,19 +163,23 @@
 
 		<!-- FOOTER -->
 		<Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" VerticalOptions="Start" BackgroundColor="White">
-			<Grid Padding="1.5" ColumnDefinitions="30,*,50,*,30">
-				<Image Grid.Column="0" Source="info_dark" Margin="5,7.5,5,7.5"/>
-				<VerticalStackLayout Grid.Column="1">
-					<Label Text="Item count: 18" FontSize="14" HorizontalTextAlignment="End"/>
-					<Label Text="Total size: 1GB" FontSize="12" HorizontalTextAlignment="End"/>
+			<Grid Padding="1.5" ColumnDefinitions="*,*,*">
+
+				<!--<Image Grid.Column="0" Source="info_dark" Margin="5,7.5,5,7.5"/>-->
+
+				<ActivityIndicator Grid.ColumnSpan="3" Margin="5" IsRunning="{Binding IsLoading}" Color="Black" HorizontalOptions="Center" VerticalOptions="Center" />
+
+				<VerticalStackLayout Grid.ColumnSpan="3" IsVisible="{Binding IsNotLoading}">
+					<Label Text="Selected: 1" FontSize="14" HorizontalTextAlignment="Center" />
+					<HorizontalStackLayout Spacing="30" HorizontalOptions="Center">
+						<Label Text="Item count: 18" FontSize="12"/>
+						<Label Text="{Binding SelectedFolderSize,StringFormat='Folder size: {0}',FallbackValue='?'}" FontSize="12"/>
+						<Label Text="Selected size: 167MB" FontSize="12"/>
+					</HorizontalStackLayout>
 				</VerticalStackLayout>
-				<Image Grid.Column="2" Source="folder2_dark" Margin="5"  IsVisible="{Binding IsNotLoading}" />
-				<ActivityIndicator Grid.Column="2" Margin="5" IsRunning="{Binding IsLoading}" Color="Black" />
-				<VerticalStackLayout Grid.Column="3">
-					<Label Text="Selected item: 1" FontSize="14" HorizontalTextAlignment="Start"/>
-					<Label Text="Total size: 167MB" FontSize="12" HorizontalTextAlignment="Start"/>
-				</VerticalStackLayout>
-				<Image Grid.Column="4" Source="tree_dark" Margin="5"/>
+
+				<!--<Image Grid.Column="2" Source="folder2_dark" Margin="5"  IsVisible="{Binding IsNotLoading}" />-->
+
 			</Grid>
 		</Border>
 

@@ -40,6 +40,7 @@ public class SharedViewModel : BaseViewModel
                 SwitchFolder(value, null);
         }
     }
+	public string SelectedFolderSize { get { if(SelectedFolder is null) return null; else return StorageHelper.GetDirectorySize(SelectedFolder?.FullPath); } }
     private string SearchText_ { get; set; }
     public string SearchText
     {
@@ -59,7 +60,6 @@ public class SharedViewModel : BaseViewModel
     private bool firstBlocker;
     private bool loopBlocker;
     public BodyTemplateSelector bodyTemplateSelector { get; set; }
-
     public int BodyLayoutType
     {
         get
@@ -225,6 +225,7 @@ public class SharedViewModel : BaseViewModel
                 HistoryBack.Add(SelectedFolder);
             UpdateRightPanel();
             SelectedFolder = Paths.Last();
+			OnPropertyChanged(nameof(SelectedFolderSize));
             NavScrollTo.Execute(--index);
         });
         loopBlocker = false;
