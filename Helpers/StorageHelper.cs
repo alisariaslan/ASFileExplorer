@@ -2,33 +2,52 @@
 
 public class StorageHelper
 {
+    public static string GetItemSize(ItemModel model)
+    {
+        if (model is null)
+            return null;
 
-	public static string GetDirectorySize(string path)
-	{
-		if (string.IsNullOrEmpty(path))
-		return null;
-	
-		long size = 0;
-		try
-		{
-			foreach (string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
-			{
-				FileInfo fileInfo = new FileInfo(filePath);
-				size += fileInfo.Length;
-			}
-		}
-		catch (Exception) {}
-		string[] sizeSuffixes = { "B", "KB", "MB", "GB", "TB" };
-		int i = 0;
-		double size1 = size;
-		while (size >= 1024 && i < sizeSuffixes.Length - 1)
-		{
-			size /= 1024;
-			i++;
-		}
-		return $"{size1:n1} {sizeSuffixes[i]}";
-	}
-	public static bool IsFolderAccesible(string path)
+        long size = 0;
+        try
+        {
+            if (model.Type == ItemType.FILE)
+            {
+                FileInfo fileInfo = new FileInfo(model.FullPath);
+                size = fileInfo.Length;
+            }
+            else
+            {
+                foreach (string filePath in Directory.EnumerateFiles(model.FullPath, "*", SearchOption.AllDirectories))
+                {
+                    FileInfo fileInfo = new FileInfo(filePath);
+                    size += fileInfo.Length;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        string[] sizeSuffixes = { "B", "KB", "MB", "GB", "TB" };
+        int i = 0;
+        while (size >= 1024 && i < sizeSuffixes.Length - 1)
+        {
+            size /= 1024;
+            i++;
+        }
+        return $"{size:n1} {sizeSuffixes[i]}";
+    }
+
+    public static string GetDirectoryItemCount(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return null;
+
+        return GetFilesAndFolders(path).Count.ToString("n0");
+    }
+
+    public static bool IsFolderAccesible(string path)
     {
         try
         {
@@ -79,7 +98,7 @@ public class StorageHelper
         while (path != null)
         {
             string fullpath = Path.GetFullPath(path);
-            folders.Insert(0, new ItemModel() { FullPath = fullpath });
+            folders.Insert(0, new ItemModel() { FullPath = fullpath, Type  = ItemType.FOLDER });
             path = Path.GetDirectoryName(path);
         }
         return folders;

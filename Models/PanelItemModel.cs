@@ -2,9 +2,11 @@
 
 public enum CommandType
 {
+    REFRESH,
     BACK,
     FORWARD,
-    SWITCH_DISPLAY
+    SWITCH_DISPLAY,
+    SWITCH_SELECTION
 }
 
 public class LeftPanelItemModel

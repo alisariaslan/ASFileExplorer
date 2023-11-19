@@ -15,12 +15,6 @@ public class TabModel : PropertyNotifier , TabInterface
         this.Content = content;
     }
 
-    public void ChangeOperationState(bool state)
-    {
-        OnOperation = state;
-        OnPropertyChanged(nameof(OnOperation));
-    }
-
     public void ChangeTabName(string newName)
     {
         Name = newName;
@@ -30,5 +24,16 @@ public class TabModel : PropertyNotifier , TabInterface
     public bool GetOperationState()
     {
         return OnOperation;
+    }
+
+    public void ChangeOperationState(bool state, string desc)
+    {
+        OnOperation = state;
+        OnPropertyChanged(nameof(OnOperation));
+    }
+
+    public void ChangeOperationState(long loadCount, long maxLoadCount)
+    {
+        throw new NotImplementedException();
     }
 }

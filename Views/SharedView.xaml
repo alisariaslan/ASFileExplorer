@@ -131,8 +131,15 @@
 
 		<!-- BODY -->
 		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}">
+			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectedItem="{Binding SelectedFile}">
 				<CollectionView.Triggers>
+					<DataTrigger TargetType="CollectionView" Binding="{Binding SelectionMode}" Value="Single">
+						<Setter Property="SelectionMode" Value="Single" />
+					</DataTrigger>
+					<DataTrigger TargetType="CollectionView" Binding="{Binding SelectionMode}" Value="Multi">
+						<Setter Property="SelectionMode"  Value="Multiple" />
+					</DataTrigger>
+
 					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="0">
 						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" />
 					</DataTrigger>
@@ -166,15 +173,29 @@
 			<Grid Padding="1.5" ColumnDefinitions="*,*,*">
 
 				<!--<Image Grid.Column="0" Source="info_dark" Margin="5,7.5,5,7.5"/>-->
-
-				<ActivityIndicator Grid.ColumnSpan="3" Margin="5" IsRunning="{Binding IsLoading}" Color="Black" HorizontalOptions="Center" VerticalOptions="Center" />
+				<Grid ColumnDefinitions="*,30,*" Grid.ColumnSpan="3" IsVisible="{Binding IsLoading}">
+					<Label Grid.Column="0" Text="{Binding LoadDesc}" FontSize="12" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+					<ActivityIndicator Grid.Column="1" Margin="2.5" IsRunning="True" Color="Black" HorizontalOptions="Center" VerticalOptions="Center"/>
+					<HorizontalStackLayout Grid.Column="2" HorizontalOptions="Center">
+						<Label FontSize="12" VerticalTextAlignment="Center">
+							<Label.FormattedText>
+								<FormattedString>
+									<Span Text="{Binding LoadCount}" />
+									<Span Text="/" />
+									<Span Text="{Binding MaxLoadCount}"/>
+								</FormattedString>
+							</Label.FormattedText>
+						</Label>
+						<Image Source="tree_dark" VerticalOptions="Center" Margin="10"/>
+					</HorizontalStackLayout>
+				</Grid>
 
 				<VerticalStackLayout Grid.ColumnSpan="3" IsVisible="{Binding IsNotLoading}">
-					<Label Text="Selected: 1" FontSize="14" HorizontalTextAlignment="Center" />
-					<HorizontalStackLayout Spacing="30" HorizontalOptions="Center">
-						<Label Text="Item count: 18" FontSize="12"/>
-						<Label Text="{Binding SelectedFolderSize,StringFormat='Folder size: {0}',FallbackValue='?'}" FontSize="12"/>
-						<Label Text="Selected size: 167MB" FontSize="12"/>
+					<Label Text="{Binding SelectedFileNameOrCount,StringFormat='{0}'}" FontSize="14" HorizontalTextAlignment="Center"/>
+					<HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+						<Label Text="{Binding SelectedFolderItemCount,StringFormat='File count: {0},'}" FontSize="12"/>
+						<Label Text="{Binding SelectedFolderSize,StringFormat='Total size: {0},'}" FontSize="12"/>
+						<Label Text="{Binding SelectedFileSize,StringFormat='Selected size: {0}'}" FontSize="12"/>
 					</HorizontalStackLayout>
 				</VerticalStackLayout>
 

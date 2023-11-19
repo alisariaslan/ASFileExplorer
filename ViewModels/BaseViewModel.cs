@@ -12,8 +12,14 @@ public class BaseViewModel : PropertyNotifier, TabInterface
     //private double LoadProgress_ { get; set; }
     //public double LoadProgress { get { return LoadProgress_; } set { LoadProgress_ = value; OnPropertyChanged(nameof(LoadProgress)); } }
 
-    //private string LoadDesc_ { get; set; }
-    //public string LoadDesc { get { return LoadDesc_; } set { LoadDesc_ = value; OnPropertyChanged(nameof(LoadDesc)); } }
+    private string LoadDesc_ { get; set; }
+    public string LoadDesc { get { return LoadDesc_; } set { LoadDesc_ = value; OnPropertyChanged(nameof(LoadDesc)); } }
+
+    private long LoadCount_ { get; set; }
+    public long LoadCount { get { return LoadCount_; } set { LoadCount_ = value; OnPropertyChanged(nameof(LoadCount)); } }
+
+    private long MaxLoadCount_ { get; set; }
+    public long MaxLoadCount { get { return MaxLoadCount_; } set { MaxLoadCount_ = value; OnPropertyChanged(nameof(MaxLoadCount)); } }
 
 
     public BaseViewModel()
@@ -30,10 +36,17 @@ public class BaseViewModel : PropertyNotifier, TabInterface
             await Task.Delay(100);
     }
 
-    public void ChangeOperationState(bool state)
+    public void ChangeOperationState(bool state,string desc)
     {
-        MyTab.ChangeOperationState(state);
+        MyTab.ChangeOperationState(state,desc);
         IsLoading = state;
+        LoadDesc = desc;
+    }
+
+    public void ChangeOperationState(long loadCount, long maxLoadCount)
+    {
+        LoadCount = loadCount;
+        MaxLoadCount = maxLoadCount;
     }
 
     public void ChangeTabName(string newName)
