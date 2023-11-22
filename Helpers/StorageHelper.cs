@@ -2,25 +2,23 @@
 
 public class StorageHelper
 {
-    public static string GetItemSize(ItemModel model)
-    {
-        if (model is null)
-            return null;
 
-        long size = 0;
+    public static ulong GetSizeRaw(ItemModel model)
+    {
+        ulong size = 0;
         try
         {
             if (model.Type == ItemType.FILE)
             {
                 FileInfo fileInfo = new FileInfo(model.FullPath);
-                size = fileInfo.Length;
+                size = (ulong)fileInfo.Length;
             }
             else
             {
                 foreach (string filePath in Directory.EnumerateFiles(model.FullPath, "*", SearchOption.AllDirectories))
                 {
                     FileInfo fileInfo = new FileInfo(filePath);
-                    size += fileInfo.Length;
+                    size += (ulong)fileInfo.Length;
                 }
             }
         }
@@ -28,7 +26,19 @@ public class StorageHelper
         {
 
         }
+        return size;
+    }
 
+    public static string GetSizeAsString(List<ItemModel> models)
+    {
+        if (models is null || models.Count == 0)
+            return null;
+
+        ulong size = 0;
+        foreach (var item in models)
+        {
+            size += GetSizeRaw(item);
+        }
         string[] sizeSuffixes = { "B", "KB", "MB", "GB", "TB" };
         int i = 0;
         while (size >= 1024 && i < sizeSuffixes.Length - 1)
@@ -98,7 +108,7 @@ public class StorageHelper
         while (path != null)
         {
             string fullpath = Path.GetFullPath(path);
-            folders.Insert(0, new ItemModel() { FullPath = fullpath, Type  = ItemType.FOLDER });
+            folders.Insert(0, new ItemModel() { FullPath = fullpath, Type = ItemType.FOLDER });
             path = Path.GetDirectoryName(path);
         }
         return folders;

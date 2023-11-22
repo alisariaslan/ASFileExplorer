@@ -131,7 +131,7 @@
 
 		<!-- BODY -->
 		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectedItem="{Binding SelectedFile}">
+			<CollectionView x:Name="cview_body" EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}" SelectionChanged="CollectionView_SelectionChanged" >
 				<CollectionView.Triggers>
 					<DataTrigger TargetType="CollectionView" Binding="{Binding SelectionMode}" Value="Single">
 						<Setter Property="SelectionMode" Value="Single" />

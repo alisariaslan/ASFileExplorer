@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Android.Content;
 using ASFileExplorer.Helpers;
 
 namespace ASFileExplorer;
@@ -23,6 +24,7 @@ public class SharedViewModel : BaseViewModel
             SelectItem(value);
         }
     }
+    public List<ItemModel> SelectedFileList { get; set; }
 
     private ItemModel SelectedFolder_ { get; set; }
     public ItemModel SelectedFolder
@@ -38,10 +40,30 @@ public class SharedViewModel : BaseViewModel
                 SwitchFolder(value, SwitchProperties.SaveHistory);
         }
     }
-    public string SelectedFolderSize { get { if (SelectedFolder is null) return "0"; else return StorageHelper.GetItemSize(SelectedFolder); } }
+    public string SelectedFolderSize { get { if (SelectedFolder is null) return "0"; else return StorageHelper.GetSizeAsString(new List<ItemModel>() { SelectedFolder }); } }
     public string SelectedFolderItemCount { get { if (SelectedFolder is null) return "0"; else return StorageHelper.GetDirectoryItemCount(SelectedFolder?.FullPath); } }
-    public string SelectedFileNameOrCount { get { if (SelectedFile is null) return "No file selected."; else return SelectedFile.Name; } }
-    public string SelectedFileSize { get { if (SelectedFile is null) return "0 KB"; else return StorageHelper.GetItemSize(SelectedFile); } }
+    public string SelectedFileNameOrCount
+    {
+        get
+        {
+            if (SelectedFileList?.Count > 0)
+                return $"{SelectedFileList.Count} item selected.";
+            else if (SelectedFile is null)
+                return "No file selected.";
+            else return SelectedFile.Name;
+        }
+    }
+    public string SelectedFileSize
+    {
+        get
+        {
+            if (SelectedFileList?.Count > 0)
+                return StorageHelper.GetSizeAsString(SelectedFileList);
+            else if (SelectedFile is null)
+                return "0 KB";
+            else return StorageHelper.GetSizeAsString(new List<ItemModel>() { SelectedFile });
+        }
+    }
 
     private string SearchText_ { get; set; }
     public string SearchText
@@ -54,6 +76,7 @@ public class SharedViewModel : BaseViewModel
         }
     }
 
+    public Command ClearSelectedItemsCommand { get; set; }
     public Command<object> SwitchFolderPreCommand { get; set; }
     public Command<object> RightPanelCommand { get; set; }
     public Command NavScrollTo { get; set; }
@@ -93,6 +116,15 @@ public class SharedViewModel : BaseViewModel
         HistoryForward = new List<ItemModel>();
         RightPanelCommand = new Command<object>(RightPanelExecute);
         SelectionMode = SelectionModeTypes.Single;
+        SelectedFileList = new List<ItemModel>();
+    }
+
+    public void InvokeSelectedFileList()
+    {
+        OnPropertyChanged(nameof(SelectedFileList));
+        OnPropertyChanged(nameof(SelectedFileNameOrCount));
+        OnPropertyChanged(nameof(SelectedFileSize));
+        UpdateRightPanel();
     }
 
     private void SetBodyTemplate(BodyDisplayTemplates target)
@@ -135,11 +167,22 @@ public class SharedViewModel : BaseViewModel
                 SwitchBodyTemplate();
                 break;
             case CommandType.SWITCH_SELECTION:
+                ClearSelectedItemsCommand.Execute(null);
+                SelectedFileList.Clear();
                 SelectedFile = null;
                 int index = ((int)SelectionMode + 1) % Enum.GetValues(typeof(SelectionModeTypes)).Length;
                 SelectionMode = (SelectionModeTypes)index;
                 OnPropertyChanged(nameof(SelectionMode));
                 UpdateRightPanel();
+                break;
+            case CommandType.OPEN_SELECTION:
+                if (SelectionMode is SelectionModeTypes.Multi)
+                {
+                }
+                else
+                {
+                  
+                }
                 break;
         }
     }
@@ -177,7 +220,17 @@ public class SharedViewModel : BaseViewModel
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
-        var items = RightPanelHelper.GetItems(HistoryBack.Count, HistoryForward.Count, (int)SelectionMode);
+
+        var sic = 0;
+        if (SelectionMode is SelectionModeTypes.Multi)
+            sic = SelectedFileList.Count;
+        else sic = SelectedFile is not null ? 1 : 0;
+
+        var hbc = HistoryBack.Count;
+        var hfc = HistoryForward.Count;
+        var sm = (int)SelectionMode;
+
+        var items = RightPanelHelper.GetItems(hbc, hfc, sm, sic);
         items.ForEach(RightPanelItems.Add);
     }
 
@@ -195,7 +248,7 @@ public class SharedViewModel : BaseViewModel
     {
         await CancelLastOperation();
         var token = GetNewOperationKey();
-        ChangeOperationState(true,"Searching...");
+        ChangeOperationState(true, "Searching...");
 
         await ClearOnlyVisualItems();
 
@@ -220,7 +273,7 @@ public class SharedViewModel : BaseViewModel
                     VisualItems.Add(filteredFiles.ElementAt(i));
                 }
             }
-            ChangeOperationState(false,string.Empty);
+            ChangeOperationState(false, string.Empty);
         });
     }
 
@@ -239,8 +292,10 @@ public class SharedViewModel : BaseViewModel
             }
             if (properties is not SwitchProperties.Empty)
                 HistoryBack.Add(SelectedFolder);
-            UpdateRightPanel();
+            SelectedFileList.Clear();
+            ClearSelectedItemsCommand.Execute(this);
             SelectedFolder = Paths.Last();
+            UpdateRightPanel();
             OnPropertyChanged(nameof(SelectedFolderSize));
             OnPropertyChanged(nameof(SelectedFolderItemCount));
             SelectedFile = null;
@@ -255,6 +310,7 @@ public class SharedViewModel : BaseViewModel
             SwitchFolder(item, SwitchProperties.SaveHistory);
         OnPropertyChanged(nameof(SelectedFileNameOrCount));
         OnPropertyChanged(nameof(SelectedFileSize));
+        UpdateRightPanel();
     }
 
     private enum SwitchProperties
@@ -302,7 +358,7 @@ public class SharedViewModel : BaseViewModel
         }
         finally
         {
-            ChangeOperationState(false,string.Empty);
+            ChangeOperationState(false, string.Empty);
             UpdateRightPanel();
         }
     }

@@ -1,15 +1,19 @@
-﻿namespace ASFileExplorer;
+﻿using CommunityToolkit.Mvvm.Messaging;
+
+namespace ASFileExplorer;
 
 public partial class SharedView : ContentView
 {
     public TabModel tab;
     private LoadingService loadingService;
     private bool initialized;
+    private IMessenger messenger;
 
-	public SharedView(LoadingService loadingService)
-	{
-		InitializeComponent();
-		this.loadingService = loadingService;
+    public SharedView(LoadingService loadingService, IMessenger messenger)
+    {
+        InitializeComponent();
+        this.loadingService = loadingService;
+        this.messenger = messenger;
     }
 
     private void NavScrollTo(int n)
@@ -26,10 +30,12 @@ public partial class SharedView : ContentView
         initialized = true;
 
         var vm = this.BindingContext as SharedViewModel;
+        vm.RegisterMessenger(messenger);
         vm.bodyTemplateSelector = GetObjectFromResources("customDataTemplateSelector") as BodyTemplateSelector;
-		vm.NavScrollTo = new Command<int>(NavScrollTo);
+        vm.NavScrollTo = new Command<int>(NavScrollTo);
         vm.MyLoadingService = loadingService;
         vm.MyTab = tab;
+        vm.ClearSelectedItemsCommand = new Command(() => cview_body.SelectedItems.Clear());
         await Task.Delay(100);
         vm.OnAppear();
     }
@@ -43,15 +49,26 @@ public partial class SharedView : ContentView
         btn.IsEnabled = true;
     }
 
-	private DataTemplate GetTemplate(BodyDisplayTemplates template)
-	{
-		return this.Resources[$"template_{template.ToString().ToLower()}"] as DataTemplate;
-	}
+    private DataTemplate GetTemplate(BodyDisplayTemplates template)
+    {
+        return this.Resources[$"template_{template.ToString().ToLower()}"] as DataTemplate;
+    }
 
     private object GetObjectFromResources(string obj)
     {
         return this.Resources[obj];
     }
 
+    void CollectionView_SelectionChanged(System.Object sender, Microsoft.Maui.Controls.SelectionChangedEventArgs e)
+    {
+        var vm = this.BindingContext as SharedViewModel;
+        if (vm.SelectionMode is SharedViewModel.SelectionModeTypes.Multi)
+        {
+            vm.SelectedFileList.Clear();
+            foreach (var item in e.CurrentSelection)
+                vm.SelectedFileList.Add(item as ItemModel);
+            vm.InvokeSelectedFileList();
+        }
+    }
 
 }

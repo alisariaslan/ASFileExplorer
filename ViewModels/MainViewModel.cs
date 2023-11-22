@@ -5,6 +5,7 @@ namespace ASFileExplorer;
 
 public class MainViewModel : BaseViewModel
 {
+    public List<PermModel> PermList;
     public int LastTabId;
     public int ActiveTabId;
 
@@ -41,6 +42,7 @@ public class MainViewModel : BaseViewModel
         NewTabCommand = new Command(CreateNewTab);
         DelTabCommand = new Command(DelTab);
         SelectedTabContent = new EmptyView("New tab creating...");
+        PermList = new List<PermModel>();
     }
 
     private void DelTab(object id_)
@@ -68,6 +70,21 @@ public class MainViewModel : BaseViewModel
         CreateNewTab();
     }
 
+    public override void MessageTaken(MessageType type, object data)
+    {
+        switch (type)
+        {
+            case MessageType.PERM_IS_CHECKED:
+                var result = (PermModel)data;
+                for (int i = 0; i < PermList.Count; i++)
+                {
+                    if (PermList[i].Perm.Equals(result.Perm))
+                        PermList[i].Permitted = result.Permitted;
+                }
+                break;
+        }
+    }
+
     private void SwitchTab(TabModel tabModel)
     {
         if (tabModel is null)
@@ -84,32 +101,32 @@ public class MainViewModel : BaseViewModel
         }
     }
 
-    public async Task WaitPermissions(IMessenger messenger, List<PermModel> permList)
+    public async Task WaitPermissions()
     {
-        messenger?.Send(new MessageData(MessageType.REQUEST_ALL_PERMS, this));
+        MyMessenger?.Send(new MessageData(MessageType.REQUEST_ALL_PERMS, this));
 
         var major = DeviceInfo.Version.Major;
         var build = DeviceInfo.Version.Build;
 
         if (major > 10)
-            permList.Add(new PermModel(PermType.MANAGE_EXTERNAL_STORAGE));
+            PermList.Add(new PermModel(PermType.MANAGE_EXTERNAL_STORAGE));
         else
         {
-            permList.Add(new PermModel(PermType.READ_EXTERNAL_STORAGE));
-            permList.Add(new PermModel(PermType.WRITE_EXTERNAL_STORAGE));
+            PermList.Add(new PermModel(PermType.READ_EXTERNAL_STORAGE));
+            PermList.Add(new PermModel(PermType.WRITE_EXTERNAL_STORAGE));
         }
         if (major > 12)
         {
-            permList.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
-            permList.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
-            permList.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
+            PermList.Add(new PermModel(PermType.READ_MEDIA_IMAGES));
+            PermList.Add(new PermModel(PermType.READ_MEDIA_VIDEO));
+            PermList.Add(new PermModel(PermType.READ_MEDIA_AUDIO));
         }
-        while (permList.Any(p => p.Permitted is false))
+        while (PermList.Any(p => p.Permitted is false))
         {
-            foreach (var item in permList)
-                messenger?.Send(new MessageData(MessageType.CHECK_ONE_PERM, item));
+            foreach (var item in PermList)
+                MyMessenger?.Send(new MessageData(MessageType.CHECK_ONE_PERM, item));
             await Task.Delay(1000);
-            var perm = permList.FirstOrDefault(p => p.Permitted is false);
+            var perm = PermList.FirstOrDefault(p => p.Permitted is false);
             if (perm is null)
                 break;
             bool answer = await App.Current.MainPage.DisplayAlert("Warning", $"{perm.Key} is not permitted. This app needs all necessary permissions to work properly.", "Retry", "Open App Settings", FlowDirection.LeftToRight);

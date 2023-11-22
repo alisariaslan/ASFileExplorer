@@ -1,16 +1,18 @@
-﻿namespace ASFileExplorer;
+﻿using Android.OS;
+using CommunityToolkit.Mvvm.Messaging;
+
+namespace ASFileExplorer;
 
 public class BaseViewModel : PropertyNotifier, TabInterface
 {
     public List<OperationModel> LocalOperations;
     public TabModel MyTab;
 
+    public IMessenger MyMessenger;
+
     private bool IsLoading_ { get; set; }
     public bool IsLoading { get { return IsLoading_; } set { IsLoading_ = value; OnPropertyChanged(nameof(IsLoading)); OnPropertyChanged(nameof(IsNotLoading)); } }
     public bool IsNotLoading { get { return !IsLoading_; } }
-
-    //private double LoadProgress_ { get; set; }
-    //public double LoadProgress { get { return LoadProgress_; } set { LoadProgress_ = value; OnPropertyChanged(nameof(LoadProgress)); } }
 
     private string LoadDesc_ { get; set; }
     public string LoadDesc { get { return LoadDesc_; } set { LoadDesc_ = value; OnPropertyChanged(nameof(LoadDesc)); } }
@@ -25,8 +27,20 @@ public class BaseViewModel : PropertyNotifier, TabInterface
     public BaseViewModel()
     {
         LocalOperations = new List<OperationModel>();
-        //LoadDesc = "Initializing...";
-        //StartLoad(null);
+    }
+
+    public void RegisterMessenger(IMessenger messenger)
+    {
+        MyMessenger = messenger;
+        MyMessenger.Register<MessageData>(this, (recipient, message) =>
+        {
+            MessageTaken(message.typeOfMessage, message.data);
+        });
+    }
+
+    public virtual void MessageTaken(MessageType type, object data)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task CancelLastOperation()
@@ -36,9 +50,9 @@ public class BaseViewModel : PropertyNotifier, TabInterface
             await Task.Delay(100);
     }
 
-    public void ChangeOperationState(bool state,string desc)
+    public void ChangeOperationState(bool state, string desc)
     {
-        MyTab.ChangeOperationState(state,desc);
+        MyTab.ChangeOperationState(state, desc);
         IsLoading = state;
         LoadDesc = desc;
     }
@@ -65,20 +79,6 @@ public class BaseViewModel : PropertyNotifier, TabInterface
     {
         return MyTab.GetOperationState();
     }
-
-    //public virtual void StartLoad(string desc)
-    //{
-    //    if (string.IsNullOrEmpty(desc) is false)
-    //        LoadDesc = desc;
-    //    LoadProgress = 1;
-    //    IsLoading = true;
-    //}
-
-    //public virtual void StopLoad()
-    //{
-    //    LoadProgress = 99;
-    //    Task.Run(async () => { await Task.Delay(100); IsLoading = false; });
-    //}
 
     public virtual void OnAppear()
     {

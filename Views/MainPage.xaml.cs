@@ -1,13 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-#if ANDROID
-using Android.OS;
-#endif
 
 namespace ASFileExplorer;
 
 public partial class MainPage : ContentPage
 {
-	private List<PermModel> permList;
     private bool initialized;
 
     private IMessenger messenger;
@@ -18,21 +14,6 @@ public partial class MainPage : ContentPage
 		InitializeComponent();
 		this.serviceProvider = serviceProvider;
 		this.messenger = messenger;
-		permList = new List<PermModel>();
-		messenger.Register<MessageData>(this, (recipient, message) =>
-		{
-			switch (message.typeOfMessage)
-			{
-				case MessageType.PERM_IS_CHECKED:
-					var result = (PermModel)message.data;
-					for (int i = 0; i < permList.Count; i++)
-					{
-						if (permList[i].Perm.Equals(result.Perm))
-							permList[i].Permitted = result.Permitted;
-					}
-					break;
-			}
-		});
 	}
 
 	async void ContentPage_Loaded(object sender, EventArgs e)
@@ -42,10 +23,11 @@ public partial class MainPage : ContentPage
         initialized = true;
 
         var vm = this.BindingContext as MainViewModel;
-		vm.serviceProvider = this.serviceProvider;
+        vm.RegisterMessenger(messenger);
+        vm.serviceProvider = this.serviceProvider;
         vm.ScrollTo = new Command<int>(ScrollTo);
 #if ANDROID
-        await vm.WaitPermissions(messenger,permList);
+        await vm.WaitPermissions();
 #endif
 		vm.OnAppear();
 
