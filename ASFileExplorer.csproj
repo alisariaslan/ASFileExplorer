@@ -18,7 +18,6 @@
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 
 		<!-- Display name -->
 		<ApplicationTitle>ASFileExplorer</ApplicationTitle>
@@ -60,7 +59,6 @@
 		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#FFF" />
 
 		<!-- Images -->
-		<PackageReference Include="CommunityToolkit.Maui" Version="5.3.0" />
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 		<MauiImage Include="Resources\Images\svg\light\*" BaseSize="256,256" TintColor="#FFF" />
@@ -71,71 +69,19 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DotNetMeteor.HotReload.Plugin" Version="3.*" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+				<PackageReference Include="Syncfusion.Maui.ListView" Version="24.2.7" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0-rc.2.23479.6" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
+		<PackageReference Include="AlohaKit.Animations" Version="1.0.0" />
+		<PackageReference Include="Refit" Version="7.0.0" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="7.0.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Remove="Resources\Images\svg\dark\download_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\download2_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\terminal_dark.svg" />
-	  <None Remove="Views\" />
-	  <None Remove="ViewModels\" />
-	  <None Remove="Models\" />
-	  <None Remove="Services\" />
-	  <None Remove="Resources\Images\svg\light\history_light.svg" />
-	  <None Remove="Resources\Images\svg\light\left_light.svg" />
-	  <None Remove="Resources\Images\svg\light\minus_light.svg" />
-	  <None Remove="Resources\Images\svg\light\plus_light.svg" />
-	  <None Remove="Resources\Images\svg\light\right_light.svg" />
-	  <None Remove="Resources\Images\svg\light\download_light.svg" />
-	  <None Remove="Resources\Images\svg\light\download2_light.svg" />
-	  <None Remove="Resources\Images\svg\light\terminal_light.svg" />
-	  <None Remove="Resources\Images\svg\dark\history_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\left_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\minus_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\plus_dark.svg" />
-	  <None Remove="Resources\Images\svg\dark\right_dark.svg" />
-	  <None Remove="Resources\Fonts\Poppins-Bold.ttf" />
-	  <None Remove="Resources\Fonts\Poppins-Medium.ttf" />
-	  <None Remove="Resources\Fonts\Poppins-Regular.ttf" />
-	  <None Remove="Resources\Fonts\Poppins-SemiBold.ttf" />
-	  <None Remove="Helpers\" />
-	  <None Remove="Resources\Images\svg\dark\diamond_dark.svg" />
-	  <None Remove="Resources\Images\svg\light\diamond_light.svg" />
-	  <None Remove="Resources\Images\embed\file_dark.svg" />
-	</ItemGroup>
-	<ItemGroup>
-	  <BundleResource Include="Resources\Images\svg\dark\download_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\download2_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\terminal_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\history_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\left_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\minus_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\plus_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\right_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\download_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\download2_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\terminal_light.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\history_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\left_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\minus_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\plus_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\dark\right_dark.svg" />
-	  <BundleResource Include="Resources\Fonts\Poppins-Bold.ttf" />
-	  <BundleResource Include="Resources\Fonts\Poppins-Medium.ttf" />
-	  <BundleResource Include="Resources\Fonts\Poppins-Regular.ttf" />
-	  <BundleResource Include="Resources\Fonts\Poppins-SemiBold.ttf" />
-	  <BundleResource Include="Resources\Images\svg\dark\diamond_dark.svg" />
-	  <BundleResource Include="Resources\Images\svg\light\diamond_light.svg" />
-	</ItemGroup>
-	<ItemGroup>
-	  <EmbeddedResource Include="Resources\Images\embed\file_dark.svg" />
-	</ItemGroup>
 </Project>

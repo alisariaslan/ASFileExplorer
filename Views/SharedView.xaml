@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ASFileExplorer.SharedView"
              xmlns:local="clr-namespace:ASFileExplorer"
-             Loaded="ContentView_Loaded">
+             Loaded="ContentView_Loaded"
+			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView">
 
 	<ContentView.BindingContext>
 		<local:SharedViewModel />
@@ -27,13 +28,10 @@
 		</Style>
 
 		<DataTemplate x:Key="template1">
-			<Grid>
-				<Border Padding="4" MinimumWidthRequest="30" MinimumHeightRequest="45">
-					<HorizontalStackLayout Spacing="5">
-						<Image Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
-						<Label Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
-					</HorizontalStackLayout>
-				</Border>
+			<Grid ColumnDefinitions="5,Auto,10,*">
+				<Image Grid.Column="1" Source="{Binding ImageSourceString}" WidthRequest="20" HeightRequest="20" />
+				<Label Grid.Column="3" Text="{Binding Name}" FontSize="14" TextColor="Black" VerticalTextAlignment="Center" />
+				<BoxView Grid.ColumnSpan="4" Color="LightGray" HeightRequest="1" VerticalOptions="End"/>
 			</Grid>
 		</DataTemplate>
 
@@ -131,26 +129,15 @@
 
 		<!-- BODY -->
 		<Border Grid.Row="1" Grid.Column="1" StrokeShape="RoundRectangle 0" BackgroundColor="White">
-			<CollectionView x:Name="cview_body" EmptyView="No items to display" ItemTemplate="{StaticResource customDataTemplateSelector}" ItemsSource="{Binding VisualItems}" SelectionMode="Single" SelectedItem="{Binding SelectedFile}" SelectionChanged="CollectionView_SelectionChanged" >
-				<CollectionView.Triggers>
-					<DataTrigger TargetType="CollectionView" Binding="{Binding SelectionMode}" Value="Single">
-						<Setter Property="SelectionMode" Value="Single" />
-					</DataTrigger>
-					<DataTrigger TargetType="CollectionView" Binding="{Binding SelectionMode}" Value="Multi">
-						<Setter Property="SelectionMode"  Value="Multiple" />
-					</DataTrigger>
-
-					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="0">
-						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalList',MacCatalyst='VerticalGrid,3'}" />
-					</DataTrigger>
-					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="1">
-						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalGrid,2',MacCatalyst='VerticalGrid,6'}" />
-					</DataTrigger>
-					<DataTrigger TargetType="CollectionView" Binding="{Binding BodyLayoutType}" Value="2">
-						<Setter Property="ItemsLayout" Value="{OnPlatform Android='VerticalGrid,3',MacCatalyst='VerticalGrid,6'}" />
-					</DataTrigger>
-				</CollectionView.Triggers>
-			</CollectionView>
+			<syncfusion:SfListView x:Name="cview_body" 
+							ItemsSource="{Binding VisualItems}"
+						  ItemSize="50"
+							SelectionMode="Multiple"
+							ItemTemplate="{StaticResource customDataTemplateSelector}"
+							EmptyView="No item to display"
+							SelectionChanged="cview_body_SelectionChanged"
+						 >
+			</syncfusion:SfListView>
 		</Border>
 
 		<!-- NAVIGATION -->
@@ -169,7 +156,7 @@
 		</Border>
 
 		<!-- FOOTER -->
-		<Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="40" VerticalOptions="Start" BackgroundColor="White">
+		<Border Grid.Row="3" Grid.ColumnSpan="3" HeightRequest="50" VerticalOptions="Start" BackgroundColor="White">
 			<Grid Padding="1.5" ColumnDefinitions="*,*,*">
 
 				<!--<Image Grid.Column="0" Source="info_dark" Margin="5,7.5,5,7.5"/>-->

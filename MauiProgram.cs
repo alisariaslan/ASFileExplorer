@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Maui;
-
-#if DEBUG
-    using DotNet.Meteor.HotReload.Plugin;
-#endif
+using Syncfusion.Maui.Core.Hosting;
 
 namespace ASFileExplorer
 {
@@ -16,9 +13,6 @@ namespace ASFileExplorer
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
-#if DEBUG
-                .EnableHotReload()
-#endif
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -29,6 +23,7 @@ namespace ASFileExplorer
                     fonts.AddFont("Poppins-Medium.ttf", "PoppinsMedium");
                 });
 
+            builder.ConfigureSyncfusionCore();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

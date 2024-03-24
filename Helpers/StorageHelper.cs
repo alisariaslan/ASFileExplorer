@@ -22,7 +22,7 @@ public class StorageHelper
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
 
         }
@@ -63,7 +63,7 @@ public class StorageHelper
         {
             return Directory.GetFileSystemEntries(path).Any();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return false;
         }

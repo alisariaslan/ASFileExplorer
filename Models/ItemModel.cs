@@ -55,7 +55,7 @@ public class ItemModel
                 var bytes = File.ReadAllBytes(FullPath);
                 return ImageSource.FromStream(() => new MemoryStream(bytes));
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
                 return null;
             }

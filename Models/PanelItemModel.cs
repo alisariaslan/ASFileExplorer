@@ -6,8 +6,7 @@ public enum CommandType
     BACK,
     FORWARD,
     SWITCH_DISPLAY,
-    SWITCH_SELECTION,
-    OPEN_SELECTION
+    COPY,
 }
 
 public class LeftPanelItemModel

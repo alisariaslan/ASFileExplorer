@@ -1,11 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using Android.Content;
 using ASFileExplorer.Helpers;
+using MobilGarsonNative.Others;
 
 namespace ASFileExplorer;
 
 public class SharedViewModel : BaseViewModel
 {
+    public SharedView View { get; set; }
     public ObservableCollection<ItemModel> Paths { get; set; }
     public List<ItemModel> Items { get; set; }
     public ObservableCollection<ItemModel> VisualItems { get; set; }
@@ -13,19 +14,7 @@ public class SharedViewModel : BaseViewModel
     public ObservableCollection<RightPanelItemModel> RightPanelItems { get; set; }
     public List<ItemModel> HistoryBack { get; set; }
     public List<ItemModel> HistoryForward { get; set; }
-    public ItemModel SelectedFile_ { get; set; }
-    public ItemModel SelectedFile
-    {
-        get { return SelectedFile_; }
-        set
-        {
-            SelectedFile_ = value;
-            OnPropertyChanged(nameof(SelectedFile));
-            SelectItem(value);
-        }
-    }
-    public List<ItemModel> SelectedFileList { get; set; }
-
+    public List<ItemModel> SelectedItems { get; set; }
     private ItemModel SelectedFolder_ { get; set; }
     public ItemModel SelectedFolder
     {
@@ -46,25 +35,24 @@ public class SharedViewModel : BaseViewModel
     {
         get
         {
-            if (SelectedFileList?.Count > 0)
-                return $"{SelectedFileList.Count} item selected.";
-            else if (SelectedFile is null)
+            if (SelectedItems?.Count > 0)
+                return $"{SelectedItems.Count} item selected.";
+            else if (SelectedItems.FirstOrDefault() is null)
                 return "No file selected.";
-            else return SelectedFile.Name;
+            else return SelectedItems.FirstOrDefault().Name;
         }
     }
-    public string SelectedFileSize
-    {
-        get
-        {
-            if (SelectedFileList?.Count > 0)
-                return StorageHelper.GetSizeAsString(SelectedFileList);
-            else if (SelectedFile is null)
-                return "0 KB";
-            else return StorageHelper.GetSizeAsString(new List<ItemModel>() { SelectedFile });
-        }
-    }
-
+    //public string SelectedFileSize
+    //{
+    //    get
+    //    {
+    //        if (SelectedFileList?.Count > 0)
+    //            return StorageHelper.GetSizeAsString(SelectedFileList);
+    //        else if (SelectedFile is null)
+    //            return "0 KB";
+    //        else return StorageHelper.GetSizeAsString(new List<ItemModel>() { SelectedFile });
+    //    }
+    //}
     private string SearchText_ { get; set; }
     public string SearchText
     {
@@ -75,15 +63,12 @@ public class SharedViewModel : BaseViewModel
             SearchItem(value);
         }
     }
-
-    public Command ClearSelectedItemsCommand { get; set; }
     public Command<object> SwitchFolderPreCommand { get; set; }
     public Command<object> RightPanelCommand { get; set; }
-    public Command NavScrollTo { get; set; }
     public LoadingService MyLoadingService { get; set; }
-
     private bool firstBlocker;
     private bool loopBlocker;
+    public bool MultiSelectEnabled { get; set; }
     public BodyTemplateSelector bodyTemplateSelector { get; set; }
     public int BodyLayoutType
     {
@@ -96,14 +81,6 @@ public class SharedViewModel : BaseViewModel
         }
     }
 
-    public enum SelectionModeTypes
-    {
-        Single,
-        Multi
-    }
-
-    public SelectionModeTypes SelectionMode { get; set; }
-
     public SharedViewModel()
     {
         Paths = new ObservableCollection<ItemModel>();
@@ -115,16 +92,30 @@ public class SharedViewModel : BaseViewModel
         HistoryBack = new List<ItemModel>();
         HistoryForward = new List<ItemModel>();
         RightPanelCommand = new Command<object>(RightPanelExecute);
-        SelectionMode = SelectionModeTypes.Single;
-        SelectedFileList = new List<ItemModel>();
+        SelectedItems = new List<ItemModel>();
     }
 
-    public void InvokeSelectedFileList()
+    public void SelectedItemsChanged()
     {
-        OnPropertyChanged(nameof(SelectedFileList));
-        OnPropertyChanged(nameof(SelectedFileNameOrCount));
-        OnPropertyChanged(nameof(SelectedFileSize));
-        UpdateRightPanel();
+        if(MultiSelectEnabled)
+        {
+
+        }else
+        {
+            var file = SelectedItems.FirstOrDefault();
+            if (file?.Type is ItemType.FOLDER )
+            {
+                View.ClearItemSelections();
+                SwitchFolder(new ItemModel(file.FullPath), SwitchProperties.SaveHistory);
+            }else
+            {
+                OnPropertyChanged(nameof(SelectedFileNameOrCount));
+                //View.ClearItemSelections();
+                ToastHelper.MakeToastFast("Bu geçerli bir klasör değil");
+            }
+        }
+        //OnPropertyChanged(nameof(SelectedFileSize));
+        //UpdateRightPanel();
     }
 
     private void SetBodyTemplate(BodyDisplayTemplates target)
@@ -166,24 +157,7 @@ public class SharedViewModel : BaseViewModel
             case CommandType.SWITCH_DISPLAY:
                 SwitchBodyTemplate();
                 break;
-            case CommandType.SWITCH_SELECTION:
-                ClearSelectedItemsCommand.Execute(null);
-                SelectedFileList.Clear();
-                SelectedFile = null;
-                int index = ((int)SelectionMode + 1) % Enum.GetValues(typeof(SelectionModeTypes)).Length;
-                SelectionMode = (SelectionModeTypes)index;
-                OnPropertyChanged(nameof(SelectionMode));
-                UpdateRightPanel();
-                break;
-            case CommandType.OPEN_SELECTION:
-                if (SelectionMode is SelectionModeTypes.Multi)
-                {
-                }
-                else
-                {
-                  
-                }
-                break;
+
         }
     }
 
@@ -193,21 +167,17 @@ public class SharedViewModel : BaseViewModel
         SwitchFolder(new ItemModel(item.Path), SwitchProperties.SaveHistory);
     }
 
-    private async Task ClearItems()
+    private Task ClearItems()
     {
-        await Task.Run(() =>
-        {
-            Items.Clear();
-            VisualItems.Clear();
-        });
+        Items.Clear();
+        VisualItems.Clear();
+        return Task.CompletedTask;
     }
 
-    private async Task ClearOnlyVisualItems()
+    private Task ClearOnlyVisualItems()
     {
-        await Task.Run(() =>
-        {
-            VisualItems.Clear();
-        });
+        VisualItems.Clear();
+        return Task.CompletedTask;
     }
 
     public override void OnAppear()
@@ -220,28 +190,18 @@ public class SharedViewModel : BaseViewModel
     private void UpdateRightPanel()
     {
         RightPanelItems.Clear();
-
-        var sic = 0;
-        if (SelectionMode is SelectionModeTypes.Multi)
-            sic = SelectedFileList.Count;
-        else sic = SelectedFile is not null ? 1 : 0;
-
+        var sic = SelectedItems.Count;
         var hbc = HistoryBack.Count;
         var hfc = HistoryForward.Count;
-        var sm = (int)SelectionMode;
-
-        var items = RightPanelHelper.GetItems(hbc, hfc, sm, sic);
+        var items = RightPanelHelper.GetItems(hbc, hfc, sic);
         items.ForEach(RightPanelItems.Add);
     }
 
     private void UpdateLeftPanel()
     {
         LeftPanelItems.Clear();
-        Task.Run(() =>
-        {
-            var items = LeftPanelHelper.GetItems();
-            items.ForEach(LeftPanelItems.Add);
-        });
+        var items = LeftPanelHelper.GetItems();
+        items.ForEach(LeftPanelItems.Add);
     }
 
     private async void SearchItem(string name)
@@ -249,10 +209,8 @@ public class SharedViewModel : BaseViewModel
         await CancelLastOperation();
         var token = GetNewOperationKey();
         ChangeOperationState(true, "Searching...");
-
         await ClearOnlyVisualItems();
-
-        await Task.Run(() =>
+        App.Current.Dispatcher.Dispatch(() =>
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -277,39 +235,36 @@ public class SharedViewModel : BaseViewModel
         });
     }
 
-    private async Task UpdateNavigation(ItemModel model, SwitchProperties properties)
+    private Task UpdateNavigation(ItemModel model, SwitchProperties properties)
     {
         loopBlocker = true;
         Paths.Clear();
-        await Task.Run(() =>
+        var navigationFolders = StorageHelper.GetFoldersToRoot(model.FullPath);
+        int index = 0;
+        for (int i = 0; i < navigationFolders?.Count(); i++)
         {
-            var navigationFolders = StorageHelper.GetFoldersToRoot(model.FullPath);
-            int index = 0;
-            for (int i = 0; i < navigationFolders?.Count(); i++)
-            {
-                Paths.Add(navigationFolders.ElementAt(i));
-                index++;
-            }
-            if (properties is not SwitchProperties.Empty)
-                HistoryBack.Add(SelectedFolder);
-            SelectedFileList.Clear();
-            ClearSelectedItemsCommand.Execute(this);
-            SelectedFolder = Paths.Last();
-            UpdateRightPanel();
-            OnPropertyChanged(nameof(SelectedFolderSize));
-            OnPropertyChanged(nameof(SelectedFolderItemCount));
-            SelectedFile = null;
-            NavScrollTo.Execute(--index);
-        });
+            Paths.Add(navigationFolders.ElementAt(i));
+            index++;
+        }
+        if (properties is not SwitchProperties.Empty)
+            HistoryBack.Add(SelectedFolder);
+        SelectedItems.Clear();
+        View.ClearItemSelections();
+        SelectedFolder = Paths.Last();
+        UpdateRightPanel();
+        OnPropertyChanged(nameof(SelectedFolderSize));
+        OnPropertyChanged(nameof(SelectedFolderItemCount));
+        View.NavScrollTo(--index);
         loopBlocker = false;
+        return Task.CompletedTask;
     }
 
     private void SelectItem(ItemModel item)
     {
         if (item?.Type is ItemType.FOLDER)
             SwitchFolder(item, SwitchProperties.SaveHistory);
-        OnPropertyChanged(nameof(SelectedFileNameOrCount));
-        OnPropertyChanged(nameof(SelectedFileSize));
+        //OnPropertyChanged(nameof(SelectedFileNameOrCount));
+        //OnPropertyChanged(nameof(SelectedFileSize));
         UpdateRightPanel();
     }
 
@@ -323,31 +278,29 @@ public class SharedViewModel : BaseViewModel
     {
         if (loopBlocker is true)
             return;
-
         await CancelLastOperation();
         var cancelToken = GetNewOperationKey();
         ChangeOperationState(true, "Directory constructing...");
-
         try
         {
             var all = StorageHelper.GetFilesAndFolders(folder.FullPath);
             await UpdateNavigation(folder, properties);
             await ClearItems();
             ChangeTabName(folder.Name);
-
-            for (int i = 0; i < all?.Count(); i++)
+            App.Current.Dispatcher.Dispatch(() =>
             {
-                if (cancelToken.IsCancellationRequested)
-                    break;
-                await Task.Run(() =>
+                for (int i = 0; i < all?.Count(); i++)
                 {
+                    if (cancelToken.IsCancellationRequested)
+                        break;
                     Items.Add(all.ElementAt(i));
                     VisualItems.Add(all.ElementAt(i));
                     ChangeOperationState(VisualItems.Count, all.Count);
-                });
-            }
+                }
+                OnPropertyChanged(nameof(VisualItems));
+            });
         }
-        catch (System.UnauthorizedAccessException ex)
+        catch (System.UnauthorizedAccessException)
         {
             await App.Current.MainPage.DisplayAlert("Error occured", $"Access denied: {folder.FullPath}", "Ok");
 

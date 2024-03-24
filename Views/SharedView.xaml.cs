@@ -1,43 +1,38 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Syncfusion.Maui.ListView;
 
 namespace ASFileExplorer;
 
 public partial class SharedView : ContentView
 {
     public TabModel tab;
-    private LoadingService loadingService;
     private bool initialized;
-    private IMessenger messenger;
+    private SharedViewModel ViewModel { get; set; }
 
-    public SharedView(LoadingService loadingService, IMessenger messenger)
+    public SharedView(LoadingService MyLoadingService, IMessenger MyMessenger)
     {
         InitializeComponent();
-        this.loadingService = loadingService;
-        this.messenger = messenger;
+        this.ViewModel = this.BindingContext as SharedViewModel;
+        this.ViewModel.View = this;
+        this.ViewModel.RegisterMessenger(MyMessenger);
+        this.ViewModel.bodyTemplateSelector = GetObjectFromResources("customDataTemplateSelector") as BodyTemplateSelector;
+        this.ViewModel.MyLoadingService = MyLoadingService;
     }
 
-    private void NavScrollTo(int n)
+    public void NavScrollTo(int n)
     {
         if (n < 0)
             return;
         cv_nav.ScrollTo(n);
     }
 
-    async void ContentView_Loaded(System.Object sender, System.EventArgs e)
+    void ContentView_Loaded(System.Object sender, System.EventArgs e)
     {
         if (initialized)
             return;
         initialized = true;
-
-        var vm = this.BindingContext as SharedViewModel;
-        vm.RegisterMessenger(messenger);
-        vm.bodyTemplateSelector = GetObjectFromResources("customDataTemplateSelector") as BodyTemplateSelector;
-        vm.NavScrollTo = new Command<int>(NavScrollTo);
-        vm.MyLoadingService = loadingService;
-        vm.MyTab = tab;
-        vm.ClearSelectedItemsCommand = new Command(() => cview_body.SelectedItems.Clear());
-        await Task.Delay(100);
-        vm.OnAppear();
+        this.ViewModel.MyTab = tab;
+        this.ViewModel.OnAppear();
     }
 
     async void ImageButton_Clicked(System.Object sender, System.EventArgs e)
@@ -59,16 +54,23 @@ public partial class SharedView : ContentView
         return this.Resources[obj];
     }
 
-    void CollectionView_SelectionChanged(System.Object sender, Microsoft.Maui.Controls.SelectionChangedEventArgs e)
+    public void ClearItemSelections()
     {
-        var vm = this.BindingContext as SharedViewModel;
-        if (vm.SelectionMode is SharedViewModel.SelectionModeTypes.Multi)
-        {
-            vm.SelectedFileList.Clear();
-            foreach (var item in e.CurrentSelection)
-                vm.SelectedFileList.Add(item as ItemModel);
-            vm.InvokeSelectedFileList();
-        }
+        cview_body.SelectedItems.Clear();
     }
+
+    void cview_body_SelectionChanged(System.Object sender, Syncfusion.Maui.ListView.ItemSelectionChangedEventArgs e)
+    {
+        var items = (sender as SfListView).SelectedItems.ToList();
+        foreach (var item in items)
+        {
+            if (item is ItemModel model)
+            {
+                ViewModel.SelectedItems.Add(model);
+            }
+        }
+        ViewModel.SelectedItemsChanged();
+    }
+
 
 }
